@@ -75,4 +75,4 @@ target
 .idea
 
 # Ficheros propios de windows
-desktop.ini
+#desktop.ini

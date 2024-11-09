@@ -1,13 +1,21 @@
 ## PR2
 
 ## Author
-- name: #name#
-- e-mail: #email#
+- name: Amador Narbona Sánchez
+- e-mail: anarbonas@uoc.edu
 
 ## 
 ## Overview
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam at arcu ac turpis varius dignissim sit amet non risus. Fusce ornare dolor ut lorem pulvinar, vitae malesuada risus cursus. Integer aliquet ligula sed dui cursus consequat. Aliquam erat volutpat. Proin ac placerat purus.
+- Aquí tenemos que indicar lo siguiente:
+- Alcance de la entrega.
+- Modificaciones y/o actualizaciones realizadas sobre el diseño inicial propuesto (solución oficial de la PEC1) con su justificación en el caso de que haya sido necesaria alguna estructura de datos adicional.
+- Indicaciones sobre los nuevos juegos de pruebas.
+- Problemas.
+- Comentarios adicionales.
+
+## Notas
+- Creo que no piden la clase StoredBook, pero como sale referenciada en la PEC1, la añado y ya la tengo.
 
 
 
