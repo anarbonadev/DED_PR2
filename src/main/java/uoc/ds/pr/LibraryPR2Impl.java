@@ -20,24 +20,21 @@ public class LibraryPR2Impl implements Library {
     private Reader[] readers = new Reader[MAX_NUM_READERS];
     private Worker[] workers = new Worker[MAX_NUM_WORKERS];
 
-    // Declaro la cola de pilas
-    private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
 
-    // Lista encadenada de libros catalogados
-    LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
     // Los mensajes de error indicados los recuperamos del fichero error_messages.properties
     private static final ResourceBundle bundle = ResourceBundle.getBundle("error_messages");
 
 
     // La voy a instanciar para no perder el import --> no se si es como un datawarehouse
-    private BookWareHouse bookWareHouse = new BookWareHouse();
+    private BookWareHouse bookWareHouse;
 
 
     /***
      * Constructor
      */
     public LibraryPR2Impl() {
+        this.bookWareHouse = new BookWareHouse();
     }
 
 
@@ -132,6 +129,11 @@ public class LibraryPR2Impl implements Library {
     @Override
     public void storeBook(String bookId, String title, String publisher, String edition, int publicationYear, String isbn, String author, String theme) {
 
+        // Cambio todo este código por
+        bookWareHouse.storeBook(bookId, title, publisher, edition, publicationYear, isbn, author, theme);
+
+
+        /*
         try {
             // Creo una instancia de un libro con los datos que recibo
             StoredBook storedBook = new StoredBook(bookId, title, publisher, edition, publicationYear, isbn, author, theme);
@@ -157,9 +159,17 @@ public class LibraryPR2Impl implements Library {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        */
     }
 
 
+    /***
+     * Función que se usa para que un trabajador catalogue un libro
+     * @param workerId Es el identificador del trabajador
+     * @return Devuelve un libro de tipo CatalogedBook
+     * @throws NoBookException Excepción que salta si no hay ningún libro pendiente de catalogar
+     * @throws WorkerNotFoundException Excepción que salta si no exíste el trabajador indicado
+     */
     @Override
     public CatalogedBook catalogBook(String workerId) throws NoBookException, WorkerNotFoundException {
 
@@ -180,7 +190,10 @@ public class LibraryPR2Impl implements Library {
         // Extraemos el primer libro de la pila
         StoredBook storedBook = firstStack.pop();
 
-        // Hay que convertir el storedBook a un catelogedBook, pero antes tengo que saber si ya tenemos algún libro igual catalogado
+        // Hay que convertir el storedBook a un catelogedBook, pero antes tengo que saber
+        // si ya tenemos algún libro igual catalogado para obtener
+        // el total de copias que hay de ese libro
+        // la cantidad de copias disponibles, no prestadas, de ese libro
 
         //LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
@@ -397,20 +410,4 @@ public class LibraryPR2Impl implements Library {
         return workerUpsert;
     }
 
-
-    /***
-     * Función que crea una nueva pila, añade el libro que recibe por parámetros a dicha pila y luego añade la pila
-     * a la cola
-     * @param storedBook Es el libro que vamos a añadir
-     */
-    private void addNewStack(StoredBook storedBook) {
-        // Instanciamos una nueva pila
-        StackArrayImpl<StoredBook> newStackArray = new StackArrayImpl<StoredBook>(MAX_BOOK_STACK);
-
-        // Añadimos el libro a la pila
-        newStackArray.push(storedBook);
-
-        // Insertamos la pila en la cola
-        this.queueLinkedList.add(newStackArray);
-    }
 }

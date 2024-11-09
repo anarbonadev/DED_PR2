@@ -1,9 +1,20 @@
 package uoc.ds.pr.util;
 
+import edu.uoc.ds.adt.sequential.LinkedList;
+import edu.uoc.ds.adt.sequential.StackArrayImpl;
 import uoc.ds.pr.model.Book;
+import uoc.ds.pr.model.CatalogedBook;
 import uoc.ds.pr.model.StoredBook;
 
+import static uoc.ds.pr.Library.MAX_BOOK_STACK;
+
 public class BookWareHouse {
+
+    // Declaro la cola de pilas
+    private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
+
+    // Lista encadenada de libros catalogados
+    LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
 
     // Constructor
@@ -47,8 +58,16 @@ public class BookWareHouse {
      */
     public void storeBook(String bookId, String title, String publisher, String edition, int publicationYear,
                           String isbn, String author, String theme) {
-        // TODO: ¿dónde guardo el libro?
+
+        // Creo una instancia de un libro con los datos que recibo
+        Book storedBook = new Book(bookId, title, publisher, edition, publicationYear, isbn, author, theme);
+
+        // Llamo a una función privada y común, que almacena el libro
+        newStoreBook(storedBook);
+
     }
+
+
 
 
     /***
@@ -116,5 +135,58 @@ public class BookWareHouse {
 
             return 0;
         }
+    }
+
+
+    /***********************************************************************************/
+    /******************** PRIVATE OPERATIONS *******************************************/
+    /***********************************************************************************/
+
+
+    /***
+     * Función que recibe un libro de tipo StoredBook
+     * @param storedBook
+     */
+    private void newStoreBook(StoredBook storedBook) {
+        try {
+
+            // Comprobamos si la cola está vacía o no
+            if(this.queueLinkedList.isEmpty()) {
+                // Si está vacía, se añade una nueva pila con el libro
+                addNewStack(storedBook);
+            } else {
+
+                // Tengo que recuperar el último montón de libros y ver cuántos libros tiene
+                StackArrayImpl<StoredBook> lastStack = this.queueLinkedList.getLastNode();
+
+                // Si tenemos una pila y su tamaño es menor de MAX_BOOK_STACK añadimos el libro a esa pila
+                if(lastStack != null && lastStack.size() < MAX_BOOK_STACK) {
+                    lastStack.push(storedBook);
+                } else {
+                    // Hay que crear una nueva pila, añadir el libro, y la pila a la cola
+                    addNewStack(storedBook);
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /***
+     * Función que crea una nueva pila, añade el libro que recibe por parámetros a dicha pila y luego añade la pila
+     * a la cola
+     * @param storedBook Es el libro que vamos a añadir
+     */
+    private void addNewStack(StoredBook storedBook) {
+        // Instanciamos una nueva pila
+        StackArrayImpl<StoredBook> newStackArray = new StackArrayImpl<StoredBook>(MAX_BOOK_STACK);
+
+        // Añadimos el libro a la pila
+        newStackArray.push(storedBook);
+
+        // Insertamos la pila en la cola
+        this.queueLinkedList.add(newStackArray);
     }
 }
