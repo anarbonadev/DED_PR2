@@ -15,7 +15,6 @@
 - Comentarios adicionales.
 
 ## Notas
-- Creo que no piden la clase StoredBook, pero como sale referenciada en la PEC1, la añado y ya la tengo.
-
-
+-
+- Añado una nueva excepción que se lanzará cuando se quiera añadir un nuevo lector al array pero no quepan más. La he llamado MaxNumReadersException.
 

@@ -3,45 +3,38 @@ package uoc.ds.pr.model;
 /*
 * Clase que representa a un libro, con los atributos básicos
 * */
-public abstract class Book {
+public class Book {
 
     // Protected attributes
-    protected int bookId;           // Identificador
-    protected String isbn;          // ISBN
-    protected String title;         // Título
-    protected String editorial;     // Editorial
-    protected int publicationYear;  // Año de publicación
-    protected int edition;          // Número de edición
-    protected String author;        // Autor
-    protected String theme;         // Temática
+    public String bookId;        // Identificador
+    public String title;         // Título
+    public String publisher;     // Editorial
+    public String edition;          // Número de edición
+    public int publicationYear;  // Año de publicación
+    public String isbn;          // ISBN
+    public String author;        // Autor
+    public String theme;         // Temática
 
     // Constructor
-    public Book(int bookId, String isbn, String title, String editorial, int publicationYear, int edition, String author, String theme) {
+    public Book(String bookId, String title, String publisher, String edition, int publicationYear, String isbn, String author, String theme) {
         this.bookId = bookId;
-        this.isbn = isbn;
         this.title = title;
-        this.editorial = editorial;
-        this.publicationYear = publicationYear;
+        this.publisher = publisher;
         this.edition = edition;
+        this.publicationYear = publicationYear;
+        this.isbn = isbn;
         this.author = author;
         this.theme = theme;
     }
 
     // Getters & Setters
-    public int getBookId() {
+
+    public String getBookId() {
         return bookId;
     }
 
-    public void setBookId(int bookId) {
+    public void setBookId(String bookId) {
         this.bookId = bookId;
-    }
-
-    public String getIsbn() {
-        return isbn;
-    }
-
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
     }
 
     public String getTitle() {
@@ -52,12 +45,20 @@ public abstract class Book {
         this.title = title;
     }
 
-    public String getEditorial() {
-        return editorial;
+    public String getPublisher() {
+        return publisher;
     }
 
-    public void setEditorial(String editorial) {
-        this.editorial = editorial;
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public String getEdition() {
+        return edition;
+    }
+
+    public void setEdition(String edition) {
+        this.edition = edition;
     }
 
     public int getPublicationYear() {
@@ -68,12 +69,12 @@ public abstract class Book {
         this.publicationYear = publicationYear;
     }
 
-    public int getEdition() {
-        return edition;
+    public String getIsbn() {
+        return isbn;
     }
 
-    public void setEdition(int edition) {
-        this.edition = edition;
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
     }
 
     public String getAuthor() {

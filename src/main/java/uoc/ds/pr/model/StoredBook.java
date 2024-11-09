@@ -6,7 +6,7 @@ package uoc.ds.pr.model;
 * */
 public class StoredBook extends Book {
     // Constructor
-    public StoredBook(int bookId, String isbn, String title, String editorial, int publicationYear, int edition, String author, String theme) {
-        super(bookId, isbn, title, editorial, publicationYear, edition, author, theme);
+    public StoredBook(String bookId, String title, String publisher, String edition, int publicationYear, String isbn, String author, String theme) {
+        super(bookId, title, publisher, edition, publicationYear, isbn, author, theme);
     }
 }

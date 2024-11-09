@@ -6,18 +6,15 @@ package uoc.ds.pr.model;
 * */
 public class CatalogedBook extends Book {
 
-    /*
-    * Clase Libro catalogado: subclase de Libro: campos extra: #cantidad de ejemplares totales y #cantidad
-    * de ejemplares disponibles.
-    * */
-
     // Protected attributes
     protected int totalCopies;      // Cantidad de ejemplares totales
     protected int availableCopies;  // Cantidad de ejemplares disponibles
 
     // Constructor
-    public CatalogedBook(int bookId, String isbn, String title, String editorial, int publicationYear, int edition, String author, String theme) {
-        super(bookId, isbn, title, editorial, publicationYear, edition, author, theme);
+    public CatalogedBook(String bookId, String title, String publisher, String edition, int publicationYear, String isbn, String author, String theme, int totalCopies, int availableCopies) {
+        super(bookId, title, publisher, edition, publicationYear, isbn, author, theme);
+        this.totalCopies = totalCopies;
+        this.availableCopies = availableCopies;
     }
 
     // Getters & Setters
