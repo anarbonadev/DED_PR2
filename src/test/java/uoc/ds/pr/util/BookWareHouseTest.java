@@ -23,6 +23,8 @@ public class BookWareHouseTest {
         Assert.assertEquals(0, bookWareHouse.numBooks());
 
 
+        // Procesamos los libros que contiene booksData1 --> son 15, por lo que se deben guardar 10 en 1 pila y 5 en la
+        // siguiente pila
         addBooksData(BooksData.booksData1);
         Assert.assertEquals(15, bookWareHouse.numBooks());
         Assert.assertEquals(2, bookWareHouse.numStacks());
@@ -86,6 +88,8 @@ public class BookWareHouseTest {
         Assert.assertEquals(14, bookWareHouse.numStacks());
         Assert.assertEquals(131, bookWareHouse.numBooks());
 
+        // El libro con bookId = "JV2c" se ha insertado al procesar la matriz booksData1. El libro está en la cima
+        // de la pila 1
         BookWareHouse.Position position = bookWareHouse.getPosition("JV2c");
         Assert.assertEquals(0, position.getNumStack());
         Assert.assertEquals(0, position.getNum());

@@ -1,11 +1,14 @@
 package uoc.ds.pr;
 
 import java.time.LocalDate;
+import java.util.ResourceBundle;
 
+import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.StackArrayImpl;
 import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.exceptions.*;
 import uoc.ds.pr.model.*;
+import uoc.ds.pr.util.BookWareHouse;
 import uoc.ds.pr.util.QueueLinkedList;
 
 
@@ -20,20 +23,22 @@ public class LibraryPR2Impl implements Library {
     // Declaro la cola de pilas
     private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
 
+    // Lista encadenada de libros catalogados
+    LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
+
+    // Los mensajes de error indicados los recuperamos del fichero error_messages.properties
+    private static final ResourceBundle bundle = ResourceBundle.getBundle("error_messages");
 
 
+    // La voy a instanciar para no perder el import --> no se si es como un datawarehouse
+    private BookWareHouse bookWareHouse = new BookWareHouse();
 
 
-    /*
-    * Constructor
-    * */
+    /***
+     * Constructor
+     */
     public LibraryPR2Impl() {
     }
-
-
-    /*
-    * Implementation of the methods defined in the Library interface
-    * */
 
 
     /***
@@ -53,7 +58,7 @@ public class LibraryPR2Impl implements Library {
 
             // Compruebo si hemos llegado a la capacidad máxima del array de lectores
             if(this.readers.length == MAX_NUM_READERS) {
-                throw new MaxNumReachedException("The maximum number of readers has been reached");
+                throw new MaxNumReachedException(bundle.getString("exception.MaxNumReaders"));
             }
 
             // Reader que tengo que insertar o actualizar
@@ -89,7 +94,7 @@ public class LibraryPR2Impl implements Library {
 
             // Compruebo si hemos llegado a la capacidad máxima del array de lectores
             if(this.workers.length == MAX_NUM_WORKERS) {
-                throw new MaxNumReachedException("The maximum number of workers has been reached");
+                throw new MaxNumReachedException(bundle.getString("exception.MaxNumWorkers"));
             }
 
             // Reader que tengo que insertar o actualizar
@@ -157,6 +162,30 @@ public class LibraryPR2Impl implements Library {
 
     @Override
     public CatalogedBook catalogBook(String workerId) throws NoBookException, WorkerNotFoundException {
+
+        // Si no hay ningún libro que catalogar se indicará un error
+        if(this.queueLinkedList.isEmpty()) {
+            throw new NoBookException(bundle.getString("exception.NoBookException"));
+        }
+
+        // Si no exíste el trabajador se indicará un error
+        if(getWorker(workerId) == null) {
+            throw new WorkerNotFoundException(bundle.getString("exception.WorkerNotFoundException"));
+        }
+
+        // Extraemos, sin eliminarla, la primera pila de la cola. No la eliminamos porque el trabajador va a procesar
+        // el primer libro de la pila. Puede venir un segundo trabajador y procesar el siguiente
+        StackArrayImpl<StoredBook> firstStack = this.queueLinkedList.peek();
+
+        // Extraemos el primer libro de la pila
+        StoredBook storedBook = firstStack.pop();
+
+        // Hay que convertir el storedBook a un catelogedBook, pero antes tengo que saber si ya tenemos algún libro igual catalogado
+
+        //LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
+
+
+
         return null;
     }
 
