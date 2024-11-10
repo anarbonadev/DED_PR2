@@ -137,14 +137,14 @@ public class LibraryPR2Impl implements Library {
     @Override
     public CatalogedBook catalogBook(String workerId) throws NoBookException, WorkerNotFoundException {
 
-        // Si no hay ningún libro que catalogar se indicará un error
-        if(this.bookWareHouse.isQueueEmpty()) {
-            throw new NoBookException(bundle.getString("exception.NoBookException"));
-        }
-
         // Si no exíste el trabajador se indicará un error
         if(getWorker(workerId) == null) {
             throw new WorkerNotFoundException(bundle.getString("exception.WorkerNotFoundException"));
+        }
+
+        // Si no hay ningún libro que catalogar se indicará un error
+        if(this.bookWareHouse.isQueueEmpty()) {
+            throw new NoBookException(bundle.getString("exception.NoBookException"));
         }
 
         // Extraemos el primero libro de la primera cola
@@ -166,8 +166,12 @@ public class LibraryPR2Impl implements Library {
             addToWorkerCatalog(workerId, catalogedBookResult.getCatalogedBook());
         }
 
+        // En ambos casos, añadimos el libro a los procesados por el trabajador, aunque no le compute como procesado
+        addBookToProcessedByWorker(workerId, bookToCatalog);
+
         return catalogedBookResult.getCatalogedBook();
     }
+
 
     /***
      * Función que se usa para prestar un libro a un lector
@@ -270,12 +274,21 @@ public class LibraryPR2Impl implements Library {
     }
 
     /***
-     * Función que devuelve el número de lectores registrados en la biblioteca
-     * @return
+     * Función que devuelve el número de lectores registrados en la biblioteca. Recorremos el array de lectores
+     * y las posiciones que no sean nulas suman al total de lectores
+     * @return Devuelve el número de lectores registrados en la biblioteca
      */
     @Override
     public int numReaders() {
-        return BookWareHouse.readers.length;
+        int totalReaders = 0;
+
+        for(Reader reader : BookWareHouse.readers) {
+            if(reader != null) {
+                totalReaders++;
+            }
+        }
+
+        return totalReaders;
     }
 
     /***
@@ -298,9 +311,22 @@ public class LibraryPR2Impl implements Library {
         return null;
     }
 
+    /***
+     * Función que devuelve el número de trabajadores de la biblioteca. Recorremos el array de trabajadores
+     * y las posiciones que no sean nulas suman al total de trabajadores
+     * @return Devuelve el número de trabajadores de la biblioteca
+     */
     @Override
     public int numWorkers() {
-        return BookWareHouse.workers.length;
+        int totalWorkers = 0;
+
+        for(Worker worker : BookWareHouse.workers) {
+            if(worker != null) {
+                totalWorkers++;
+            }
+        }
+
+        return totalWorkers;
     }
 
     //
@@ -496,6 +522,7 @@ public class LibraryPR2Impl implements Library {
         for(int i = 0 ; i < BookWareHouse.readers.length; i++) {
             if(BookWareHouse.readers[i] == null){
                 BookWareHouse.readers[i] = readerUpsert;
+                break;
             }
         }
     }
@@ -548,6 +575,7 @@ public class LibraryPR2Impl implements Library {
         for(int i = 0 ; i < BookWareHouse.workers.length; i++) {
             if(BookWareHouse.workers[i] == null){
                 BookWareHouse.workers[i] = workerUpsert;
+                break;
             }
         }
     }
@@ -564,6 +592,7 @@ public class LibraryPR2Impl implements Library {
         for (int i = 0; i < BookWareHouse.workers.length; i++) {
             if(BookWareHouse.workers[i] != null && BookWareHouse.workers[i].getId().equals(workerId)) {
                 BookWareHouse.workers[i].addToWorkerCatalog(catalogedBook);
+                break;
             }
         }
     }
@@ -608,6 +637,15 @@ public class LibraryPR2Impl implements Library {
         catalogedBookResult = new CatalogedBookResult(false, catalogedBook);
 
         return catalogedBookResult;
+    }
+
+
+    /***
+     * Función que añade un libro a la lista de libros procesados por un trabajador
+     * @param workerId Identificador del trabajador
+     * @param bookToCatalog El libro que ya procesado
+     */
+    private void addBookToProcessedByWorker(String workerId, Book bookToCatalog) {
     }
 
 

@@ -22,7 +22,7 @@ public class BookWareHouse {
     // Declaro la cola de pilas
     private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
 
-    // Libros catalogados
+    // Libros catalogados en general, por todos los trabajadores
     public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
     // Préstamos
@@ -101,8 +101,14 @@ public class BookWareHouse {
      */
     public int numCatalogBooksInWorker(String workerId) {
 
-        // TODO: tengo que ver de dónde saco el valor de libros catalogados por un trabajador
+        int numberBooksCatalogued = 0;
 
+        for(Worker worker : BookWareHouse.workers) {
+            if(worker.getId().equals(workerId)) {
+                return worker.getTotalNumberOfCatalogedBooks();
+            }
+
+        }
         return 0;
     }
 

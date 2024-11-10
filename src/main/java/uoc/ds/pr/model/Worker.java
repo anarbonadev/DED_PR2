@@ -16,12 +16,18 @@ public class Worker {
     public LinkedList<Loan> closedLoans;                // Préstamos cerrados por un trabajador
     public LinkedList<CatalogedBook> catalogedBooks;    // Libros catalogados por un trabajador
 
+    // Lista de libros que han sido procesados por el trabajador, aunque no le computen como catalogados por él
+    public LinkedList<Book> processedBooks;
+
 
     // Constructor
     public Worker(String id, String name, String surname) {
         this.id = id;
         this.name = name;
         this.surname = surname;
+        this.openLoans = new LinkedList<>();
+        this.closedLoans = new LinkedList<>();
+        this.catalogedBooks = new LinkedList<>();
     }
 
     // Getters & Setters
@@ -73,6 +79,14 @@ public class Worker {
         this.catalogedBooks = catalogedBooks;
     }
 
+    public LinkedList<Book> getProcessedBooks() {
+        return processedBooks;
+    }
+
+    public void setProcessedBooks(LinkedList<Book> processedBooks) {
+        this.processedBooks = processedBooks;
+    }
+
     /***
      * Función que inserta un nuevo libro a la lista de libros catalogados por el trabajador
      * @param catalogedBook Es el libro recién catalogado que insertamos
@@ -80,4 +94,22 @@ public class Worker {
     public void addToWorkerCatalog(CatalogedBook catalogedBook) {
         this.catalogedBooks.insertEnd(catalogedBook);
     }
+
+    /***
+     * Función que usamos para recuperar la cantidad total de libros catalogados por el trabajador
+     * @return Total de libros catalogados
+     */
+    public int getTotalNumberOfCatalogedBooks() {
+        return catalogedBooks.size();
+    }
+
+    /***
+     * Función que usamos para llevar un control de todos los libros que han sido procesados por un trabajador
+     * aunque no le computen como catalogados por él porque otro trabajador ya catalogó antes el mismo libro
+     * @param book El libro que ha procesado
+     */
+    public void addBookToProcessedBook(Book book) {
+        this.processedBooks.insertEnd(book);
+    }
+
 }
