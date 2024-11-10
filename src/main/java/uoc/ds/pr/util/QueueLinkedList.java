@@ -27,8 +27,8 @@ public class QueueLinkedList<E> extends LinkedList<E> implements Queue<E> {
     }
 
     /***
-     * Devuelve el último elemento de la lista enlazada
-     * @return
+     * Devuelve el último elemento de la lista enlazada, que en nuestro caso es una pila
+     * @return Devuelve la última pila encolada
      */
     public E getLast() {
         return this.last.getElem();

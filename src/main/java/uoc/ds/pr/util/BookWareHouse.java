@@ -2,6 +2,7 @@ package uoc.ds.pr.util;
 
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.StackArrayImpl;
+import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.model.*;
 
 import static uoc.ds.pr.Library.*;
@@ -43,13 +44,21 @@ public class BookWareHouse {
 
     /***
      * Función que cuenta la cantidad de libros total que hay en la cola, sumando los libros de todas las pilas
-     * @return Devuelve el número toal de libros
+     * @return Devuelve el número total de libros
      */
     public int numBooks() {
 
-        // TODO: tengo que ver dónde estarían guardados estos datos
+        int totalBooks = 0;
 
-        return 0;
+        // Creamos un iterador para recorrer la cola
+        Iterator<StackArrayImpl<StoredBook>> iterator = queueLinkedList.values();
+
+        while (iterator.hasNext()) {
+            StackArrayImpl<StoredBook> stackArray = iterator.next();
+            totalBooks += stackArray.size();
+        }
+
+        return totalBooks;
     }
 
     /***
@@ -58,9 +67,17 @@ public class BookWareHouse {
      */
     public int numStacks() {
 
-        // TODO: tengo que ver dónde estarían guardados estos datos
+        int totalStacks = 0;
 
-        return 0;
+        // Creamos un iterador para recorrer la cola
+        Iterator<StackArrayImpl<StoredBook>> iterator = queueLinkedList.values();
+
+        while (iterator.hasNext()) {
+            iterator.next();
+            totalStacks++;
+        }
+
+        return totalStacks;
     }
 
 
