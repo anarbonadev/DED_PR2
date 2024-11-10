@@ -256,32 +256,23 @@ public class BookWareHouse {
      * @return Devuelve un libro pendiente de catalogar
      */
     public Book getBookPendingCataloging() {
-        Book book = null;
 
-        // Extraemos, sin eliminarla, la primera pila de la QUEUE
-        StackArrayImpl<StoredBook> firstStack = queueLinkedList.peek();
-
-        // Extraemos el primer libro de la STACK
-        StoredBook storedBook = firstStack.pop();
+        // Extraemos el libro que está en la cima de la primera STACK
+        StoredBook storedBook = queueLinkedList.peek().pop();
 
         // Si el tamaño de la primera pila es 0, la eliminamos
-        if(firstStack.size() == 0)
+        if(queueLinkedList.peek().size() == 0)
         {
-            //queueLinkedList.poll();
-
-            // TODO: comprobar que realmente elimina el primero elemento de la cola
             queueLinkedList.deleteFirst();
         }
 
         // Mapeo el objeto StoredBook a un Book
         if(storedBook != null)
         {
-            // String bookId, String title, String publisher, String edition, int publicationYear, String isbn, String author, String theme
-            book = new Book(storedBook.getBookId(), storedBook.getTitle(), storedBook.getPublisher(), storedBook.getEdition()
-                    ,storedBook.getPublicationYear(), storedBook.getIsbn(), storedBook.getAuthor(), storedBook.getTheme());
+            return storedBook;
         }
 
-        return book;
+        return null;
     }
 
     /***
