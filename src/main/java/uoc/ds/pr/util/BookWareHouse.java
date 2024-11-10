@@ -281,9 +281,38 @@ public class BookWareHouse {
      * @return Devuelve la posición que ocupa el libro
      */
     public Position getPosition(String bookId) {
-        Position position = null;
+        Position position = new Position();
+        boolean found = false;
 
-        // TODO: desarrollar esta parte
+        // Creamos un iterador para recorrer la cola
+        Iterator<StackArrayImpl<StoredBook>> iterator = queueLinkedList.values();
+
+        while (iterator.hasNext() && !found) {
+
+            // Incrementamos el número de STACK
+            position.incNumStack();
+
+            // Reseteamos el valor de numPosition
+            position.setNumPosition(-1);
+
+            // Sacamos la cola que ocupa esta posición del iterador
+            StackArrayImpl<StoredBook> stackArray = iterator.next();
+
+            // Creamos un nuevo iterador, pero esta vez de la cola
+            Iterator<StoredBook> storedBookIterator = stackArray.values();
+
+            while (storedBookIterator.hasNext() && !found) {
+
+                // Sacamos el libro que ocupa esta posición del iterador
+                StoredBook storedBook = storedBookIterator.next();
+
+                if(bookId.equals(storedBook.getBookId())) {
+                    found = true;
+                }
+
+                position.incNumPosition();
+            }
+        }
 
         return position;
     }
@@ -294,6 +323,14 @@ public class BookWareHouse {
      */
     public class Position {
 
+        private int numStack;
+        private int numPosition;
+
+        // Constructor
+        public Position() {
+            this.numStack = -1;
+            this.numPosition = -1;
+        }
 
         /***
          * Función que devuelve el número de pila dónde está el libro. La primera pila es la número 0, la siguiente
@@ -301,10 +338,7 @@ public class BookWareHouse {
          * @return Devuelve el número de la cola dónde se encuentra el libro
          */
         public int getNumStack() {
-
-            // TODO: desarrollar esta parte
-
-            return 0;
+            return numStack;
         }
 
         /***
@@ -313,10 +347,25 @@ public class BookWareHouse {
          * @return Devuelve la posición del libro, dentro de la pila dónde está el libro.
          */
         public int getNum() {
+            return numPosition;
+        }
 
-            // TODO: desarrollar esta parte
+        /***
+         * Función que incrementa en +1 el valor de numStack
+         */
+        public void incNumStack() {
+            this.numStack++;
+        }
 
-            return 0;
+        /***
+         * Función que incrementa en +1 el valor de numPosition
+         */
+        public void incNumPosition() {
+            this.numPosition++;
+        }
+
+        public void setNumPosition(int numPosition) {
+            this.numPosition = numPosition;
         }
     }
 
