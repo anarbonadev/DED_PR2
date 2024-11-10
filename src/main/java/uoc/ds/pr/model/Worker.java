@@ -10,6 +10,10 @@ public class Worker {
     public String name;     // Nombre del trabajador
     public String surname;  // Apellido del trabajador
 
+    // Este atributo no está en la PEC1, pero creo que es necesario. Nos sirve para saber cuántos libros
+    // ha catalogado un trabajador
+    public int quantityOfBooksCatalogued;
+
     // Constructor
     public Worker(String id, String name, String surname) {
         this.id = id;
@@ -40,5 +44,20 @@ public class Worker {
 
     public void setSurname(String surname) {
         this.surname = surname;
+    }
+
+    public int getQuantityOfBooksCatalogued() {
+        return quantityOfBooksCatalogued;
+    }
+
+    public void setQuantityOfBooksCatalogued(int quantityOfBooksCatalogued) {
+        this.quantityOfBooksCatalogued = quantityOfBooksCatalogued;
+    }
+
+    /***
+     * Función que incrementa la cantidad de libros catalogados por el trabajador en 1
+     */
+    public void incrementQuantityOfBooksCatalogued() {
+        this.quantityOfBooksCatalogued++;
     }
 }

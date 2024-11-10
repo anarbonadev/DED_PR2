@@ -84,37 +84,6 @@ public class QueueLinkedList<E> implements Queue<E> {
         return null;
     }
 
-    /***
-     * Devuelve el tamaño de la última pila que hay en la cola
-     * @return El tamaño de la última pila
-     */
-    /*
-    public int getLastStackSize(){
-        if(list.isEmpty()){
-            throw new EmptyContainerException(bundle.getString("exception.queueLinkedList.emptyQueue"));
-        }
-
-        // Obtenemos el primer objeto de la Linked List
-        E lastPos =  list.values().next();
-
-        // Vamos avanzando hasta llegar al último nodo
-        while (lastPos != null && list.values().hasNext()){
-            lastPos = list.values().next();
-        }
-
-        if(lastPos != null){
-            try {
-                // Usamos reflexión para llamar a size() de manera genérica
-                Method sizeMethod = lastPos.getClass().getMethod("size");
-                return (int) sizeMethod.invoke(lastPos);
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-    }
-    */
-
 
     /***
      * Función que devuelve el último nodo de la cola. En nuestro caso, nos devolverá la última pila
@@ -139,5 +108,13 @@ public class QueueLinkedList<E> implements Queue<E> {
         }
 
         return null;
+    }
+
+    /***
+     * Función que elimina la primera STACK de la QUEUE
+     * @return
+     */
+    public E deleteFirst(){
+        return this.list.deleteFirst();
     }
 }

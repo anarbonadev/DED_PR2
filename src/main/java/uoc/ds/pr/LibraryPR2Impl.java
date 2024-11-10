@@ -4,31 +4,33 @@ import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 import edu.uoc.ds.adt.sequential.LinkedList;
-import edu.uoc.ds.adt.sequential.StackArrayImpl;
 import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.exceptions.*;
 import uoc.ds.pr.model.*;
 import uoc.ds.pr.util.BookWareHouse;
-import uoc.ds.pr.util.QueueLinkedList;
 
 
 public class LibraryPR2Impl implements Library {
 
-    /*
-    * Attributes
-    * */
+    /***
+     * Los mensajes de error indicados los recuperamos del fichero error_messages.properties
+     */
+    private static final ResourceBundle bundle = ResourceBundle.getBundle("error_messages");
+
+    /***
+     * Attributes
+     */
     private Reader[] readers = new Reader[MAX_NUM_READERS];
     private Worker[] workers = new Worker[MAX_NUM_WORKERS];
 
+    // Lista encadenada de libros catalogados
+    LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
 
-    // Los mensajes de error indicados los recuperamos del fichero error_messages.properties
-    private static final ResourceBundle bundle = ResourceBundle.getBundle("error_messages");
-
-
-    // La voy a instanciar para no perder el import --> no se si es como un datawarehouse
+    /***
+     * BookWareHouse controla todo lo referente al sistema de recepción de libros, procesamiento, colas, pilas...
+     */
     private BookWareHouse bookWareHouse;
-
 
     /***
      * Constructor
@@ -102,7 +104,7 @@ public class LibraryPR2Impl implements Library {
 
             if (worker != null) {
                 // Añado una función que busque al reader dentro del array y actualice los datos
-                worker = updateWorker(workerUpsert);
+                worker = incrementBooksCataloguedByWorkerId(workerUpsert);
             }
             else {
                 // Añado el nuevo worker al array
@@ -128,38 +130,8 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public void storeBook(String bookId, String title, String publisher, String edition, int publicationYear, String isbn, String author, String theme) {
-
-        // Cambio todo este código por
+        // Llamo a la función storeBook del bookWareHouse, que se encarga de las gestiones de la biblioteca
         bookWareHouse.storeBook(bookId, title, publisher, edition, publicationYear, isbn, author, theme);
-
-
-        /*
-        try {
-            // Creo una instancia de un libro con los datos que recibo
-            StoredBook storedBook = new StoredBook(bookId, title, publisher, edition, publicationYear, isbn, author, theme);
-
-            // Comprobamos si la cola está vacía o no
-            if(this.queueLinkedList.isEmpty()) {
-                // Si está vacía, se añade una nueva pila con el libro
-                addNewStack(storedBook);
-            } else {
-
-                // Tengo que recuperar el último montón de libros y ver cuántos libros tiene
-                StackArrayImpl<StoredBook> lastStack = this.queueLinkedList.getLastNode();
-
-                // Si tenemos una pila y su tamaño es menor de MAX_BOOK_STACK añadimos el libro a esa pila
-                if(lastStack != null && lastStack.size() < MAX_BOOK_STACK) {
-                    lastStack.push(storedBook);
-                } else {
-                    // Hay que crear una nueva pila, añadir el libro, y la pila a la cola
-                    addNewStack(storedBook);
-                }
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        */
     }
 
 
@@ -174,7 +146,7 @@ public class LibraryPR2Impl implements Library {
     public CatalogedBook catalogBook(String workerId) throws NoBookException, WorkerNotFoundException {
 
         // Si no hay ningún libro que catalogar se indicará un error
-        if(this.queueLinkedList.isEmpty()) {
+        if(this.bookWareHouse.isQueueEmpty()) {
             throw new NoBookException(bundle.getString("exception.NoBookException"));
         }
 
@@ -183,23 +155,24 @@ public class LibraryPR2Impl implements Library {
             throw new WorkerNotFoundException(bundle.getString("exception.WorkerNotFoundException"));
         }
 
-        // Extraemos, sin eliminarla, la primera pila de la cola. No la eliminamos porque el trabajador va a procesar
-        // el primer libro de la pila. Puede venir un segundo trabajador y procesar el siguiente
-        StackArrayImpl<StoredBook> firstStack = this.queueLinkedList.peek();
+        // Extraemos el primero libro de la primera cola
+        Book bookToCatalog = this.bookWareHouse.getBookPendingCataloging();
 
-        // Extraemos el primer libro de la pila
-        StoredBook storedBook = firstStack.pop();
+        // Comprobamos si el libro exíste o no en la Linked List de libros catalogados
+        // Si existe el libro, actualizamos sus valores totalCopies + 1 y availableCopies + 1
+        // Si no existe, lo agregamos al final
+        CatalogedBookResult catalogedBookResult = this.findAndUpdateBookByIsbn(bookToCatalog, workerId);
 
-        // Hay que convertir el storedBook a un catelogedBook, pero antes tengo que saber
-        // si ya tenemos algún libro igual catalogado para obtener
-        // el total de copias que hay de ese libro
-        // la cantidad de copias disponibles, no prestadas, de ese libro
+        // Si el libro ya existía en la colección de libros catalogados, sea el trabajador actual que catalogó
+        // el libro la primera vez o no, no se incrementa la cantidad de libros catalogados por el trabajador
 
-        //LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
+        // Si no se encontró en el catálogo, es la primera vez que se añade y se suma al total de libros
+        // catalogados por el trabajador
+        if(!catalogedBookResult.getFound()) {
+            incrementBooksCataloguedByWorkerId(workerId);
+        }
 
-
-
-        return null;
+        return catalogedBookResult.getCatalogedBook();
     }
 
     @Override
@@ -397,7 +370,7 @@ public class LibraryPR2Impl implements Library {
      * @param workerUpsert Objeto que contiene los datos del trabajador que estamos actualizando
      * @return Devuelve el propio trabajador con los datos actualizados
      */
-    private Worker updateWorker(Worker workerUpsert) {
+    private Worker incrementBooksCataloguedByWorkerId(Worker workerUpsert) {
         // Recorremos el array buscando el worker a actualizar
         for(int i = 0 ; i < MAX_NUM_WORKERS; i++) {
             if(this.workers[i] != null && this.workers[i].getId().equals(workerUpsert.getId())) {
@@ -410,4 +383,98 @@ public class LibraryPR2Impl implements Library {
         return workerUpsert;
     }
 
+    /***
+     * Función que busca dentro de la colección de libros catalogados, catalogedBook, el libro pendiente de catalogar.
+     * Si el libro existe, incrementa en +1 los valores de totalCopies y availableCopies.
+     * Si no existe, lo añade a la colección, con valores de totalCopies y availableCopies a 1
+     * @param bookToCatalog Es el libro pendiente de ser catalogado
+     * @return Devuelve el libro catalogado
+     */
+    private CatalogedBookResult findAndUpdateBookByIsbn(Book bookToCatalog, String workerId) {
+
+        CatalogedBookResult catalogedBookResult = null;
+
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = this.catalogedBooks.values();
+
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+            if(catalogedBook.getIsbn().equals(bookToCatalog.getIsbn())) {
+                // Si encuentro el libro actualizamos los valores totalCopies y availableCopies
+                catalogedBook.setTotalCopies(catalogedBook.getTotalCopies() + 1);
+                catalogedBook.setAvailableCopies(catalogedBook.getAvailableCopies() + 1);
+
+                catalogedBookResult = new CatalogedBookResult(true, catalogedBook);
+
+                return catalogedBookResult;
+            }
+        }
+
+        // Si no se encuentra el libro, añadimos el libro a catalogedBooks
+        CatalogedBook catalogedBook = new CatalogedBook(bookToCatalog.getBookId(), bookToCatalog.getTitle()
+                , bookToCatalog.getPublisher(), bookToCatalog.getEdition(), bookToCatalog.getPublicationYear()
+                , bookToCatalog.getIsbn(), bookToCatalog.getAuthor(), bookToCatalog.getTheme()
+                , 1, 1, workerId);
+        this.catalogedBooks.insertEnd(catalogedBook);
+
+        catalogedBookResult = new CatalogedBookResult(false, catalogedBook);
+
+        return catalogedBookResult;
+    }
+
+
+    /***
+     * Función que incrementa el atributo quantityOfBooksCatalogued del trabajador que ha catalogado por
+     * primera vez un libro
+     * @param workerId Es el indentificador único del trabajador
+     */
+    private void incrementBooksCataloguedByWorkerId(String workerId){
+        for (int i = 0; i < workers.length; i++) {
+            Worker worker = this.workers[i];
+            if(worker.getId().equals(workerId)) {
+                this.workers[i].incrementQuantityOfBooksCatalogued();
+            }
+        }
+    }
+
+
+    /***********************************************************************************/
+    /******************** NESTED CLASSES ***********************************************/
+    /***********************************************************************************/
+
+
+    /***
+     * Clase auxiliar que uso en la respuesta del método findAndUpdateBookByIsbn
+     */
+    private class CatalogedBookResult {
+
+        // Atributos
+        private Boolean found;
+        private CatalogedBook catalogedBook;
+
+        // Constructor
+        public CatalogedBookResult(Boolean found, CatalogedBook catalogedBook) {
+            this.found = found;
+            this.catalogedBook = catalogedBook;
+        }
+
+        // Getters y Setters
+
+        public Boolean getFound() {
+            return found;
+        }
+
+        public void setFound(Boolean found) {
+            this.found = found;
+        }
+
+        public CatalogedBook getCatalogedBook() {
+            return catalogedBook;
+        }
+
+        public void setCatalogedBook(CatalogedBook catalogedBook) {
+            this.catalogedBook = catalogedBook;
+        }
+    }
 }

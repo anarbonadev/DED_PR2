@@ -13,14 +13,9 @@ public class BookWareHouse {
     // Declaro la cola de pilas
     private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
 
-    // Lista encadenada de libros catalogados
-    LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
-
-
     // Constructor
     public BookWareHouse() {
     }
-
 
     /***
      * Función que cuenta la cantidad de libros total que hay en la cola, sumando los libros de todas las pilas
@@ -59,15 +54,16 @@ public class BookWareHouse {
     public void storeBook(String bookId, String title, String publisher, String edition, int publicationYear,
                           String isbn, String author, String theme) {
 
-        // Creo una instancia de un libro con los datos que recibo
-        Book storedBook = new Book(bookId, title, publisher, edition, publicationYear, isbn, author, theme);
+        // Las funciones para almacenar los libros reciben objetos de clase Book. Pero los objetos que metemos en
+        // las pilas y, a su vez, en la cola, son objetos de tipo StoredBook, ya que una vez están en las pilas
+        // son libros almacenados
+
+        // Creo una instancia de un StoredBook con los datos que recibo
+        StoredBook storedBook = new StoredBook(bookId, title, publisher, edition, publicationYear, isbn, author, theme);
 
         // Llamo a una función privada y común, que almacena el libro
-        newStoreBook(storedBook);
-
+        addBookToQueue(storedBook);
     }
-
-
 
 
     /***
@@ -75,7 +71,11 @@ public class BookWareHouse {
      * @param book Objeto que contiene los datos del libro que hay que almacenar
      */
     public void storeBook(Book book) {
-        // TODO: ¿dónde guardo el libro?
+        // Recibimos un objeto de tipo Book, pero necesitamos un StoredBook
+        StoredBook storedBook = new StoredBook(book);
+
+        // Llamo a una función privada y común, que almacena el libro
+        addBookToQueue(storedBook);
     }
 
 
@@ -87,7 +87,28 @@ public class BookWareHouse {
     public Book getBookPendingCataloging() {
         Book book = null;
 
-        // TODO: ¿dónde tengo la cola que hay que procesar?
+        // Extraemos, sin eliminarla, la primera pila de la QUEUE
+        StackArrayImpl<StoredBook> firstStack = this.queueLinkedList.peek();
+
+        // Extraemos el primer libro de la STACK
+        StoredBook storedBook = firstStack.pop();
+
+        // Si el tamaño de la primera pila es 0, la eliminamos
+        if(firstStack.size() == 0)
+        {
+            //this.queueLinkedList.poll();
+
+            // TODO: comprobar que realmente elimina el primero elemento de la cola
+            this.queueLinkedList.deleteFirst();
+        }
+
+        // Mapeo el objeto StoredBook a un Book
+        if(storedBook != null)
+        {
+            // String bookId, String title, String publisher, String edition, int publicationYear, String isbn, String author, String theme
+            book = new Book(storedBook.getBookId(), storedBook.getTitle(), storedBook.getPublisher(), storedBook.getEdition()
+                    ,storedBook.getPublicationYear(), storedBook.getIsbn(), storedBook.getAuthor(), storedBook.getTheme());
+        }
 
         return book;
     }
@@ -137,6 +158,14 @@ public class BookWareHouse {
         }
     }
 
+    /***
+     * Función que nos indica si la cola está vacía o no
+     * @return Devuelve true si la cola está vacía, y false en caso contrario
+     */
+    public boolean isQueueEmpty() {
+        return queueLinkedList.isEmpty();
+    }
+
 
     /***********************************************************************************/
     /******************** PRIVATE OPERATIONS *******************************************/
@@ -144,10 +173,13 @@ public class BookWareHouse {
 
 
     /***
-     * Función que recibe un libro de tipo StoredBook
+     * Función que recibe un libro de tipo StoredBook y en función de si la última pila de la cola está llena o no
+     * hace una de 2 cosas:
+     *      - Si la última pila tiene menos de 10 libros, añade este StoredBook a esa cola
+     *      - Si la última pila tiene 10 libros, crea una nueva pila, añade el StoredBook y luego añade la pila a la cola
      * @param storedBook
      */
-    private void newStoreBook(StoredBook storedBook) {
+    private void addBookToQueue(StoredBook storedBook) {
         try {
 
             // Comprobamos si la cola está vacía o no
@@ -159,8 +191,8 @@ public class BookWareHouse {
                 // Tengo que recuperar el último montón de libros y ver cuántos libros tiene
                 StackArrayImpl<StoredBook> lastStack = this.queueLinkedList.getLastNode();
 
-                // Si tenemos una pila y su tamaño es menor de MAX_BOOK_STACK añadimos el libro a esa pila
-                if(lastStack != null && lastStack.size() < MAX_BOOK_STACK) {
+                // Si tenemos una pila y no está llena
+                if(lastStack != null && !lastStack.isFull()) {
                     lastStack.push(storedBook);
                 } else {
                     // Hay que crear una nueva pila, añadir el libro, y la pila a la cola
@@ -189,4 +221,5 @@ public class BookWareHouse {
         // Insertamos la pila en la cola
         this.queueLinkedList.add(newStackArray);
     }
+
 }
