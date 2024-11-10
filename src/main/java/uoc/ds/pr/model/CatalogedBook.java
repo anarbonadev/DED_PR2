@@ -24,10 +24,6 @@ public class CatalogedBook extends Book {
     }
 
     // Getters & Setters
-    public int getTotalCopies() {
-        return totalCopies;
-    }
-
     public void setTotalCopies(int totalCopies) {
         this.totalCopies = totalCopies;
     }
@@ -46,5 +42,14 @@ public class CatalogedBook extends Book {
 
     public void setIdWorker(String idWorker) {
         this.idWorker = idWorker;
+    }
+
+    /***
+     * Función que devuelve el total de copias que hay de un libro catalogado. Como tengo esta función no añado
+     * un getter para este atributo
+     * @return
+     */
+    public int numCopies() {
+        return totalCopies;
     }
 }

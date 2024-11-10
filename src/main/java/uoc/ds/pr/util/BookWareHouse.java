@@ -2,13 +2,26 @@ package uoc.ds.pr.util;
 
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.StackArrayImpl;
-import uoc.ds.pr.model.Book;
-import uoc.ds.pr.model.CatalogedBook;
-import uoc.ds.pr.model.StoredBook;
+import uoc.ds.pr.model.*;
 
-import static uoc.ds.pr.Library.MAX_BOOK_STACK;
+import static uoc.ds.pr.Library.*;
 
 public class BookWareHouse {
+
+    /***
+     * Aquí declaro todas las estructuras de datos que vamos a usar. Se indican en la PEC1, página 15
+     */
+
+    // Lectores
+    public static final Reader[] readers = new Reader[MAX_NUM_READERS];
+
+    // Trabajadores
+    public static final Worker[] workers = new Worker[MAX_NUM_WORKERS];
+
+    // Libros catalogados
+    public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
+
+
 
     // Declaro la cola de pilas
     private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
@@ -35,6 +48,71 @@ public class BookWareHouse {
     public int numStacks() {
 
         // TODO: tengo que ver dónde estarían guardados estos datos
+
+        return 0;
+    }
+
+
+    /***
+     * Función que devuelve la cantidad total de libros catalogados
+     * @return Devuelve la cantidad total de libros catalogados
+     */
+    public int numCatalogBooks() {
+
+        // TODO: tengo que ver que debe devolver. Parece que tiene que devolver la cantidad total de libros catalogados
+
+        return 0;
+    }
+
+    /***
+     * Función que devuelve la cantidad de libros catalogados por un trabajador. Se consideran catalogados por un
+     * trabajador cuando es la primera vez que se cataloga un libro.
+     *      Si un segundo trabajador cataloga un libro que ya fue catalogado por otro trabajador, no cuenta
+     * @param workerId Identificador del trabajador
+     * @return Devuelve la cantidad total de libros catalogados por el trabajador
+     */
+    public int numCatalogBooksInWorker(String workerId) {
+
+        // TODO: tengo que ver de dónde saco el valor de libros catalogados por un trabajador
+
+        return 0;
+    }
+
+
+    /***
+     * Función que devuelve la cantidad TOTAL de libros procesados por un trabajador, le cuente o no como libro
+     * catalogado
+     * @param workerId Identificador del trabajador
+     * @return Devuelve la cantidad total de libros procesados por el trabajador
+     */
+    public int totalCatalogBooksByWorker(String workerId) {
+
+        // TODO: tengo que ver de dónde saco el total de libros procesados por un trabajador
+
+        return 0;
+    }
+
+
+    /***
+     * Función que devuelve la cantidad total de copias que hay en la biblioteca de un libro concreto
+     * @param bookId Identificador del libro del que queremos saber cuántas copias tenemos
+     * @return Devuelve la cantidad de copias que hay del libro
+     */
+    public int numCopies(String bookId) {
+
+        // TODO: sacar de la colección de libros catalogados la cantidad de copias
+
+        return 0;
+    }
+
+
+    /***
+     * Función que devuelve la cantidad de libros que se han prestado en total
+     * @return Devuelve la cantidad de libros prestados
+     */
+    public int numLoans() {
+
+        // TODO: PEC1 página 15 -> los libros prestados son una lista encadenada (Linked List)
 
         return 0;
     }
@@ -221,5 +299,6 @@ public class BookWareHouse {
         // Insertamos la pila en la cola
         this.queueLinkedList.add(newStackArray);
     }
+
 
 }
