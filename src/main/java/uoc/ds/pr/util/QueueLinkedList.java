@@ -25,4 +25,13 @@ public class QueueLinkedList<E> extends LinkedList<E> implements Queue<E> {
         LinkedNode<E> primer = this.last.getNext();
         return primer.getElem();
     }
+
+    /***
+     * Devuelve el último elemento de la lista enlazada
+     * @return
+     */
+    public E getLast() {
+        return this.last.getElem();
+    }
+
 }

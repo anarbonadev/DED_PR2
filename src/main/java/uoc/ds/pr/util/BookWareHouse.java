@@ -19,7 +19,7 @@ public class BookWareHouse {
     public static final Worker[] workers = new Worker[MAX_NUM_WORKERS];
 
     // Declaro la cola de pilas
-    private QueueLinkedList_OLD<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList_OLD<>();
+    private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
 
     // Libros catalogados
     public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
@@ -242,7 +242,7 @@ public class BookWareHouse {
         Book book = null;
 
         // Extraemos, sin eliminarla, la primera pila de la QUEUE
-        StackArrayImpl<StoredBook> firstStack = this.queueLinkedList.peek();
+        StackArrayImpl<StoredBook> firstStack = queueLinkedList.peek();
 
         // Extraemos el primer libro de la STACK
         StoredBook storedBook = firstStack.pop();
@@ -250,10 +250,10 @@ public class BookWareHouse {
         // Si el tamaño de la primera pila es 0, la eliminamos
         if(firstStack.size() == 0)
         {
-            //this.queueLinkedList.poll();
+            //queueLinkedList.poll();
 
             // TODO: comprobar que realmente elimina el primero elemento de la cola
-            this.queueLinkedList.deleteFirst();
+            queueLinkedList.deleteFirst();
         }
 
         // Mapeo el objeto StoredBook a un Book
@@ -336,45 +336,25 @@ public class BookWareHouse {
     private void addBookToQueue(StoredBook storedBook) {
         try {
 
-            // Comprobamos si la cola está vacía o no
-            if(this.queueLinkedList.isEmpty()) {
-                // Si está vacía, se añade una nueva pila con el libro
-                addNewStack(storedBook);
+            // Comprobamos si la cola está vacía o si la última cola está llena
+            if(queueLinkedList.isEmpty() || queueLinkedList.getLast().isFull()) {
+
+                // Instanciamos una nueva pila
+                StackArrayImpl<StoredBook> newStackArray = new StackArrayImpl<StoredBook>(MAX_BOOK_STACK);
+
+                // Añadimos el libro a la pila
+                newStackArray.push(storedBook);
+
+                // Insertamos la pila en la cola
+                queueLinkedList.add(newStackArray);
+
             } else {
-
-                // Tengo que recuperar el último montón de libros y ver cuántos libros tiene
-                StackArrayImpl<StoredBook> lastStack = this.queueLinkedList.getLastNode();
-
-                // Si tenemos una pila y no está llena
-                if(lastStack != null && !lastStack.isFull()) {
-                    lastStack.push(storedBook);
-                } else {
-                    // Hay que crear una nueva pila, añadir el libro, y la pila a la cola
-                    addNewStack(storedBook);
-                }
+                // Añadimos el libro a la última pila
+                queueLinkedList.getLast().push(storedBook);
             }
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
-
-    /***
-     * Función que crea una nueva pila, añade el libro que recibe por parámetros a dicha pila y luego añade la pila
-     * a la cola
-     * @param storedBook Es el libro que vamos a añadir
-     */
-    private void addNewStack(StoredBook storedBook) {
-        // Instanciamos una nueva pila
-        StackArrayImpl<StoredBook> newStackArray = new StackArrayImpl<StoredBook>(MAX_BOOK_STACK);
-
-        // Añadimos el libro a la pila
-        newStackArray.push(storedBook);
-
-        // Insertamos la pila en la cola
-        this.queueLinkedList.add(newStackArray);
-    }
-
-
 }
