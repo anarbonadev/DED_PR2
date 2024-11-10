@@ -10,7 +10,7 @@ public class QueueLinkedListTest {
 
     @Before
     public void setUp() {
-        queue = new QueueLinkedList<>();
+        queue = new QueueLinkedList_OLD<>();
         queue.add(1);
         queue.add(2);
         queue.add(3);
