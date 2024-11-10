@@ -18,6 +18,9 @@ public class BookWareHouse {
     // Trabajadores
     public static final Worker[] workers = new Worker[MAX_NUM_WORKERS];
 
+    // Declaro la cola de pilas
+    private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
+
     // Libros catalogados
     public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
@@ -33,8 +36,6 @@ public class BookWareHouse {
 
 
 
-    // Declaro la cola de pilas
-    private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
 
     // Constructor
     public BookWareHouse() {
