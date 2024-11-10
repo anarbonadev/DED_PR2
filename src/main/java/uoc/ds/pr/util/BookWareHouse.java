@@ -42,6 +42,7 @@ public class BookWareHouse {
     public BookWareHouse() {
     }
 
+
     /***
      * Función que cuenta la cantidad de libros total que hay en la cola, sumando los libros de todas las pilas
      * @return Devuelve el número total de libros
@@ -121,9 +122,28 @@ public class BookWareHouse {
      */
     public int totalCatalogBooksByWorker(String workerId) {
 
-        // TODO: tengo que ver de dónde saco el total de libros procesados por un trabajador
+        for(Worker worker : BookWareHouse.workers) {
+            if(worker.getId().equals(workerId)) {
+                return worker.getTotalNumberOfCatalogedBooks();
+            }
+        }
 
         return 0;
+    }
+
+
+    /***
+     * Función que añade un libro a la lista de libros procesados por un trabajador
+     * @param workerId Identificador del trabajador
+     * @param bookToCatalog El libro que ya procesado
+     */
+    public void addBookToProcessedByWorker(String workerId, Book bookToCatalog) {
+        for(Worker worker : BookWareHouse.workers) {
+            if(worker.getId().equals(workerId)) {
+                worker.addBookToProcessedBook(bookToCatalog);
+                return;
+            }
+        }
     }
 
 

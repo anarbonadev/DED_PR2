@@ -28,6 +28,7 @@ public class Worker {
         this.openLoans = new LinkedList<>();
         this.closedLoans = new LinkedList<>();
         this.catalogedBooks = new LinkedList<>();
+        this.processedBooks = new LinkedList<>();
     }
 
     // Getters & Setters
@@ -110,6 +111,14 @@ public class Worker {
      */
     public void addBookToProcessedBook(Book book) {
         this.processedBooks.insertEnd(book);
+    }
+
+    /***
+     * Función que usamos para recuperar el número total de libros procesados por un trabajador
+     * @return
+     */
+    public int getTotalNumberOfProcessedBooks() {
+        return processedBooks.size();
     }
 
 }

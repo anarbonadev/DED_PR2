@@ -646,6 +646,7 @@ public class LibraryPR2Impl implements Library {
      * @param bookToCatalog El libro que ya procesado
      */
     private void addBookToProcessedByWorker(String workerId, Book bookToCatalog) {
+        this.bookWareHouse.addBookToProcessedByWorker(workerId, bookToCatalog);
     }
 
 
