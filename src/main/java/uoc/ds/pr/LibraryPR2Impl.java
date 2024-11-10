@@ -161,7 +161,9 @@ public class LibraryPR2Impl implements Library {
         // Si no se encontró en el catálogo, es la primera vez que se añade y se suma al total de libros
         // catalogados por el trabajador
         if(!catalogedBookResult.getFound()) {
-            updateWorkerQuantityOfBooksCatalogued(workerId);
+
+            // Añadimos el libro a la lista de libros catalogados por el trabajador
+            addToWorkerCatalog(workerId, catalogedBookResult.getCatalogedBook());
         }
 
         return catalogedBookResult.getCatalogedBook();
@@ -329,7 +331,7 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numCatalogBooks() {
-        return this.bookWareHouse.numCatalogBooks():
+        return this.bookWareHouse.numCatalogBooks();
     }
 
     /***
@@ -376,29 +378,58 @@ public class LibraryPR2Impl implements Library {
     }
 
 
+    /***
+     * Función que devuelve el número de préstamos gestionados por un trabajador
+     * @param workerId Identificador del trabajador
+     * @return El número de préstamos que ha gestionado
+     */
     @Override
     public int numLoansByWorker(String workerId) {
-        return 0;
+        return this.bookWareHouse.numLoansByWorker(workerId);
     }
 
+
+    /***
+     * Función que devuelve el número de copias prestadas de un libro
+     * @param bookId Identificador del libro
+     * @return El número de copias que hay prestadas
+     */
     @Override
     public int numLoansByBook(String bookId) {
-        return 0;
+        return this.bookWareHouse.numLoansByBook(bookId);
     }
 
+
+    /***
+     * Función que devuelve el número de préstamos que tiene un lector
+     * @param readerId Identificador del lector
+     * @return El número de copias que tiene un lector en préstamo
+     */
     @Override
     public int numCurrentLoansByReader(String readerId) {
-        return 0;
+        return this.bookWareHouse.numCurrentLoansByReader(readerId);
     }
 
+
+    /***
+     * Función que devuelve la cantidad de préstamos que han sido cerrados por un trabajador
+     * @param workerId Identificador del trabajador
+     * @return
+     */
     @Override
     public int numClosedLoansByWorker(String workerId) {
-        return 0;
+        return this.bookWareHouse.numClosedLoansByWorker(workerId);
     }
 
+
+    /***
+     * Función que devuelve la cantidad de préstamos que han sido cerrados por un lector
+     * @param readerId
+     * @return
+     */
     @Override
     public int numClosedLoansByReader(String readerId) {
-        return 0;
+        return this.bookWareHouse.numClosedLoansByReader(readerId);
     }
 
     /***********************************************************************************/
@@ -453,6 +484,14 @@ public class LibraryPR2Impl implements Library {
      * @param readerUpsert Es el reader que tenemos que dar de alta
      */
     private void insertReader(Reader readerUpsert) {
+
+        // Como es un lector nuevo, inicializamos ciertos valores
+        LinkedList<Loan> loans = new LinkedList<>();
+        readerUpsert.setLoans(loans);
+
+        Loan[] concurrentLoans = new Loan[MAXIMUM_NUMBER_OF_BOOKS];
+        readerUpsert.setConcurrentLoans(concurrentLoans);
+
         // Recorremos el array buscando el primer hueco dónde insertar el reader
         for(int i = 0 ; i < BookWareHouse.readers.length; i++) {
             if(BookWareHouse.readers[i] == null){
@@ -515,18 +554,20 @@ public class LibraryPR2Impl implements Library {
 
 
     /***
-     * Función que incrementa el atributo quantityOfBooksCatalogued del trabajador que ha catalogado por
-     * primera vez un libro
-     * @param workerId Es el indentificador único del trabajador
+     * Función que añade un nuevo libro a la lista de libros catalogados por el trabajador
+      * @param workerId Identificador del trabajador
+     * @param catalogedBook El libro recién catalogado
      */
-    private void updateWorkerQuantityOfBooksCatalogued(String workerId){
+    private void addToWorkerCatalog(String workerId, CatalogedBook catalogedBook)
+    {
+        // Buscamos el trabajador dentro del array
         for (int i = 0; i < BookWareHouse.workers.length; i++) {
-            Worker worker = BookWareHouse.workers[i];
-            if(worker.getId().equals(workerId)) {
-                BookWareHouse.workers[i].incrementQuantityOfBooksCatalogued();
+            if(BookWareHouse.workers[i] != null && BookWareHouse.workers[i].getId().equals(workerId)) {
+                BookWareHouse.workers[i].addToWorkerCatalog(catalogedBook);
             }
         }
     }
+
 
 
     /***

@@ -16,6 +16,5 @@
 
 ## Notas
 - Añado una nueva excepción que se lanzará cuando se quiera añadir un nuevo lector al array pero no quepan más. La he llamado MaxNumReadersException.
-- En la clase Worker añado un nuevo atributo llamado quantityOfBooksCatalogued que contiene el total de libros catalogados por el trabajador.
 - En la clase CatalogedBook añado un nuevo atributo llamado idWorker que contiene el id del trabajador que catalogó por primera vez el libro.
 

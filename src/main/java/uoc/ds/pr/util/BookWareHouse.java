@@ -21,6 +21,16 @@ public class BookWareHouse {
     // Libros catalogados
     public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
+    // Préstamos
+    public static final LinkedList<Loan> books = new LinkedList<>();
+
+
+    // Préstamos de un lector
+
+
+
+
+
 
 
     // Declaro la cola de pilas
@@ -113,6 +123,71 @@ public class BookWareHouse {
     public int numLoans() {
 
         // TODO: PEC1 página 15 -> los libros prestados son una lista encadenada (Linked List)
+
+        return 0;
+    }
+
+
+    /***
+     * Función que devuelve el número de préstamos gestionados por un trabajador
+     * @param workerId Identificador del trabajador
+     * @return El número de préstamos que ha gestionado
+     */
+    public int numLoansByWorker(String workerId) {
+
+        // TODO: ver de dónde saco este dato
+
+        return 0;
+    }
+
+
+    /***
+     * Función que devuelve el número de copias prestadas de un libro
+     * @param bookId Identificador del libro
+     * @return El número de copias que hay prestadas
+     */
+    public int numLoansByBook(String bookId) {
+
+        // TODO: ver de dónde saco este dato
+
+        return 0;
+    }
+
+
+    /***
+     * Función que devuelve el número de préstamos que tiene un lector
+     * @param readerId Identificador del lector
+     * @return El número de copias que tiene un lector en préstamo
+     */
+    public int numCurrentLoansByReader(String readerId) {
+
+        // TODO: ver de dónde saco este dato
+
+        return 0;
+    }
+
+
+    /***
+     * Función que devuelve la cantidad de préstamos que han sido cerrados por un trabajador
+     * @param workerId Identificador del trabajador
+     * @return
+     */
+    public int numClosedLoansByWorker(String workerId) {
+
+        // TODO: ver de dónde saco este dato
+
+        return 0;
+    }
+
+
+    /***
+     * Función que devuelve la cantidad de préstamos que han sido cerrados por un lector
+     * @param readerId
+     * @return
+     */
+    public int numClosedLoansByReader(String readerId) {
+
+        // TODO: ver de dónde saco este dato
 
         return 0;
     }

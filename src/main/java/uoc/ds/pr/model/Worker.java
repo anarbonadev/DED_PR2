@@ -1,18 +1,21 @@
 package uoc.ds.pr.model;
 
+import edu.uoc.ds.adt.sequential.LinkedList;
+
 /*
 * Clase que representa a un trabajador de la biblioteca
 * */
 public class Worker {
 
     // Attributes
-    public String id;       // Identificador del trabajador
-    public String name;     // Nombre del trabajador
-    public String surname;  // Apellido del trabajador
+    public String id;                                   // Identificador del trabajador
+    public String name;                                 // Nombre del trabajador
+    public String surname;                              // Apellido del trabajador
 
-    // Este atributo no está en la PEC1, pero creo que es necesario. Nos sirve para saber cuántos libros
-    // ha catalogado un trabajador
-    public int quantityOfBooksCatalogued;
+    public LinkedList<Loan> openLoans;                  // Préstamos abiertos por un trabajador
+    public LinkedList<Loan> closedLoans;                // Préstamos cerrados por un trabajador
+    public LinkedList<CatalogedBook> catalogedBooks;    // Libros catalogados por un trabajador
+
 
     // Constructor
     public Worker(String id, String name, String surname) {
@@ -46,18 +49,35 @@ public class Worker {
         this.surname = surname;
     }
 
-    public int getQuantityOfBooksCatalogued() {
-        return quantityOfBooksCatalogued;
+    public LinkedList<Loan> getOpenLoans() {
+        return openLoans;
     }
 
-    public void setQuantityOfBooksCatalogued(int quantityOfBooksCatalogued) {
-        this.quantityOfBooksCatalogued = quantityOfBooksCatalogued;
+    public void setOpenLoans(LinkedList<Loan> openLoans) {
+        this.openLoans = openLoans;
+    }
+
+    public LinkedList<Loan> getClosedLoans() {
+        return closedLoans;
+    }
+
+    public void setClosedLoans(LinkedList<Loan> closedLoans) {
+        this.closedLoans = closedLoans;
+    }
+
+    public LinkedList<CatalogedBook> getCatalogedBooks() {
+        return catalogedBooks;
+    }
+
+    public void setCatalogedBooks(LinkedList<CatalogedBook> catalogedBooks) {
+        this.catalogedBooks = catalogedBooks;
     }
 
     /***
-     * Función que incrementa la cantidad de libros catalogados por el trabajador en 1
+     * Función que inserta un nuevo libro a la lista de libros catalogados por el trabajador
+     * @param catalogedBook Es el libro recién catalogado que insertamos
      */
-    public void incrementQuantityOfBooksCatalogued() {
-        this.quantityOfBooksCatalogued++;
+    public void addToWorkerCatalog(CatalogedBook catalogedBook) {
+        this.catalogedBooks.insertEnd(catalogedBook);
     }
 }
