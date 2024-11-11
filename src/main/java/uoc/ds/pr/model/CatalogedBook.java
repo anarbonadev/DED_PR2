@@ -1,5 +1,7 @@
 package uoc.ds.pr.model;
 
+import edu.uoc.ds.adt.sequential.LinkedList;
+
 /*
 * Clase que representa a un libro catalogado.
 * Hereda de la clase Book y añade los atributos específicos para gestionar el préstamo.
@@ -13,6 +15,8 @@ public class CatalogedBook extends Book {
     // Este atributo no está en la PEC1, pero creo que es necesario. Nos sirve para saber qué trabajador fue
     // el primero en catalogar un libro
     protected String  idWorker;
+
+    public LinkedList<Loan> loans;  // Lista de todos los préstamos de un libro
 
     // Constructor
     public CatalogedBook(String bookId, String title, String publisher, String edition, int publicationYear

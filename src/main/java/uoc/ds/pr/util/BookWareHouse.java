@@ -26,7 +26,7 @@ public class BookWareHouse {
     public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
     // Préstamos
-    public static final LinkedList<Loan> books = new LinkedList<>();
+    public static final LinkedList<Loan> loans = new LinkedList<>();
 
 
     // Préstamos de un lector
@@ -83,14 +83,23 @@ public class BookWareHouse {
 
 
     /***
-     * Función que devuelve la cantidad total de libros catalogados
+     * Función que devuelve la cantidad total de libros catalogados, que corresponden con la suma del campo
+     * totalCopies de todos los libros catalogados
      * @return Devuelve la cantidad total de libros catalogados
      */
     public int numCatalogBooks() {
 
-        // TODO: tengo que ver que debe devolver. Parece que tiene que devolver la cantidad total de libros catalogados
+        int totalCatalogBooks = 0;
 
-        return 0;
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = BookWareHouse.catalogedBooks.values();
+
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+            totalCatalogBooks = totalCatalogBooks + catalogedBook.numCopies();
+        }
+        return totalCatalogBooks;
     }
 
     /***
@@ -124,7 +133,8 @@ public class BookWareHouse {
 
         for(Worker worker : BookWareHouse.workers) {
             if(worker.getId().equals(workerId)) {
-                return worker.getTotalNumberOfCatalogedBooks();
+                int dato = worker.getTotalNumberOfProcessedBooks();
+                return worker.getTotalNumberOfProcessedBooks();
             }
         }
 
@@ -154,8 +164,16 @@ public class BookWareHouse {
      */
     public int numCopies(String bookId) {
 
-        // TODO: sacar de la colección de libros catalogados la cantidad de copias
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = BookWareHouse.catalogedBooks.values();
 
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+            if(catalogedBook.getBookId().equals(bookId)) {
+                return catalogedBook.numCopies();
+            }
+        }
         return 0;
     }
 
@@ -401,6 +419,57 @@ public class BookWareHouse {
      */
     public boolean isQueueEmpty() {
         return queueLinkedList.isEmpty();
+    }
+
+
+    /***
+     * Función que busca en la colección de libros catalogados un libro por su ID
+     * @param bookId Identificador del libro que estamos buscando
+     * @return Devuelve la información del libro si lo encuentra
+     */
+    public CatalogedBook getBookById(String bookId) {
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = BookWareHouse.catalogedBooks.values();
+
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+            if(catalogedBook.getBookId().equals(bookId)) {
+                return catalogedBook;
+            }
+        }
+        return null;
+    }
+
+
+    /***
+     * Función que recupera la cantidad de libros que tiene prestados de forma simultánea un lector. Se saca del
+     * atributo concurrentLoans del lector
+     * @param readerId Identificador del lector
+     * @return Devuelve la cantidad de préstamos simultáneos del lector
+     */
+    public int getConcurrentLoansByReader(String readerId) {
+
+        // Recorremos el array buscado al lector
+        for(Reader reader : BookWareHouse.readers) {
+            if(reader != null && reader.getId().equals(readerId)) {
+
+                // Recuperamos el array dónde guardamos los préstamos simultáneos
+                Loan[] concurrentLoans = reader.getConcurrentLoans();
+
+                int totalConcurrentLoans = 0;
+
+                for(Loan loan : concurrentLoans) {
+                    if(loan != null) {
+                        totalConcurrentLoans++;
+                    }
+                }
+
+                return totalConcurrentLoans;
+            }
+        }
+
+        return 0;
     }
 
 

@@ -169,6 +169,10 @@ public class LibraryPR2Impl implements Library {
         // En ambos casos, añadimos el libro a los procesados por el trabajador, aunque no le compute como procesado
         addBookToProcessedByWorker(workerId, bookToCatalog);
 
+
+
+
+
         return catalogedBookResult.getCatalogedBook();
     }
 
@@ -191,16 +195,20 @@ public class LibraryPR2Impl implements Library {
     public void lendBook(String loanId, String readerId, String bookId, String workerId, LocalDate date, LocalDate expirationDate) throws ReaderNotFoundException, BookNotFoundException, WorkerNotFoundException, NoBookException, MaximumNumberOfBooksException {
 
         // Si el lector no existe se indicará un error
-        if(getWorker(readerId) == null) {
+        if(getReader(readerId) == null) {
             throw new ReaderNotFoundException(bundle.getString("exception.ReaderNotFoundException"));
         }
-
-        // Si el libro no existe se indicará un error
 
         // Si no exíste el trabajador se indicará un error
         if(getWorker(workerId) == null) {
             throw new WorkerNotFoundException(bundle.getString("exception.WorkerNotFoundException"));
         }
+
+        // Si el libro no existe se indicará un error
+        if(getBookById(bookId) == null){
+            throw new BookNotFoundException(bundle.getString("exception.BookNotFoundException"));
+        }
+
 
         // Si no hay ningún libro que catalogar se indicará un error
         if(this.bookWareHouse.isQueueEmpty()) {
@@ -208,10 +216,29 @@ public class LibraryPR2Impl implements Library {
         }
 
         // Si el lector ya tiene tres libros en préstamo se indicará un error
+        if(getConcurrentLoansByReader(readerId) == 3)
+        {
+            throw new MaximumNumberOfBooksException(bundle.getString("exception.MaximumNumberOfBooksException"));
+        }
+
+        // El número de ejemplares del libro disponibles desciende en una unidad
+
+
+        // El préstamo se marca como “En trámite”
+
+
+        // El número de préstamos del lector será el mismo más una unidad
+
+
+        // el número de préstamos realizados por un trabajador será el mismo más una unidad
+
+
+        // el número de préstamos global será el mismo más una unidad
 
 
 
     }
+
 
     @Override
     public Loan giveBackBook(String loanId, LocalDate date) throws LoanNotFoundException {
@@ -223,6 +250,12 @@ public class LibraryPR2Impl implements Library {
         return 0;
     }
 
+    /***
+     *
+     * @param readerId
+     * @return
+     * @throws NoLoansException
+     */
     @Override
     public Iterator<Loan> getAllLoansByReader(String readerId) throws NoLoansException {
         return null;
@@ -598,7 +631,6 @@ public class LibraryPR2Impl implements Library {
     }
 
 
-
     /***
      * Función que busca dentro de la colección de libros catalogados, catalogedBook, el libro pendiente de catalogar.
      * Si el libro existe, incrementa en +1 los valores de totalCopies y availableCopies.
@@ -647,6 +679,27 @@ public class LibraryPR2Impl implements Library {
      */
     private void addBookToProcessedByWorker(String workerId, Book bookToCatalog) {
         this.bookWareHouse.addBookToProcessedByWorker(workerId, bookToCatalog);
+    }
+
+
+    /***
+     * Función que busca en la colección de libros catalogados un libro por su ID
+     * @param bookId Identificador del libro que estamos buscando
+     * @return Devuelve la información del libro si lo encuentra
+     */
+    private CatalogedBook getBookById(String bookId) {
+        return this.bookWareHouse.getBookById(bookId);
+    }
+
+
+    /***
+     * Función que recupera la cantidad de libros que tiene prestados de forma simultánea un lector. Se saca del
+     * atributo concurrentLoans del lector
+     * @param readerId Identificador del lector
+     * @return Devuelve la cantidad de préstamos simultáneos del lector
+     */
+    private int getConcurrentLoansByReader(String readerId) {
+        return this.bookWareHouse.getConcurrentLoansByReader(readerId);
     }
 
 
