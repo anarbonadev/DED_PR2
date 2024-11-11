@@ -3,8 +3,10 @@ package uoc.ds.pr;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
+import edu.uoc.ds.adt.helpers.Position;
 import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.traversal.Iterator;
+import edu.uoc.ds.traversal.Traversal;
 import uoc.ds.pr.exceptions.*;
 import uoc.ds.pr.model.*;
 import uoc.ds.pr.util.BookWareHouse;
@@ -169,10 +171,6 @@ public class LibraryPR2Impl implements Library {
         // En ambos casos, añadimos el libro a los procesados por el trabajador, aunque no le compute como procesado
         addBookToProcessedByWorker(workerId, bookToCatalog);
 
-
-
-
-
         return catalogedBookResult.getCatalogedBook();
     }
 
@@ -200,42 +198,30 @@ public class LibraryPR2Impl implements Library {
         }
 
         // Si no exíste el trabajador se indicará un error
-        if(getWorker(workerId) == null) {
-            throw new WorkerNotFoundException(bundle.getString("exception.WorkerNotFoundException"));
-        }
+        if(getWorker(workerId) == null) throw new WorkerNotFoundException(bundle.getString("exception.WorkerNotFoundException"));
 
         // Si el libro no existe se indicará un error
-        if(getBookById(bookId) == null){
-            throw new BookNotFoundException(bundle.getString("exception.BookNotFoundException"));
-        }
-
-
-        // Si no hay ningún libro que catalogar se indicará un error
-        if(this.bookWareHouse.isQueueEmpty()) {
-            throw new NoBookException(bundle.getString("exception.NoBookException"));
-        }
+        if(getBookById(bookId) == null) throw new BookNotFoundException(bundle.getString("exception.BookNotFoundException"));
 
         // Si el lector ya tiene tres libros en préstamo se indicará un error
-        if(getConcurrentLoansByReader(readerId) == 3)
-        {
-            throw new MaximumNumberOfBooksException(bundle.getString("exception.MaximumNumberOfBooksException"));
-        }
+        if(getConcurrentLoansByReader(readerId) == 3) throw new MaximumNumberOfBooksException(bundle.getString("exception.MaximumNumberOfBooksException"));
+
+        // Instanciamos el objeto de tipo Loan. El préstamo se marca como “En trámite”
+        Loan loan = new Loan(loanId, readerId, bookId, workerId, date, expirationDate, LoanState.INPROGRESS);
 
         // El número de ejemplares del libro disponibles desciende en una unidad
-
-
-        // El préstamo se marca como “En trámite”
-
+        // TODO: pasarle a este método el Loan en lugar del BookId para que a la vez que decremento un contador, añadir el libro a los préstamos
+        checkoutBook(bookId);
 
         // El número de préstamos del lector será el mismo más una unidad
+        increaseLoanReaderCount(loan);
 
+        // El número de préstamos realizados por un trabajador será el mismo más una unidad. Entiendo que se refiere
+        // a los préstamos abiertos por un trabajador
+        increaseOpenLoanWorkerCount(loan);
 
-        // el número de préstamos realizados por un trabajador será el mismo más una unidad
-
-
-        // el número de préstamos global será el mismo más una unidad
-
-
+        // El número de préstamos global será el mismo más una unidad
+        incrementTotalLoans(loan);
 
     }
 
@@ -417,7 +403,7 @@ public class LibraryPR2Impl implements Library {
     }
 
     /***
-     * Función que devuelve la cantidad total de copias que hay en la biblioteca de un libro concreto
+     * Función que devuelve la cantidad total de copias DISPONIBLES que hay en la biblioteca de un libro concreto
      * @param bookId Identificador del libro del que queremos saber cuántas copias tenemos
      * @return Devuelve la cantidad de copias que hay del libro
      */
@@ -438,7 +424,7 @@ public class LibraryPR2Impl implements Library {
 
 
     /***
-     * Función que devuelve el número de préstamos gestionados por un trabajador
+     * Función que devuelve el número de préstamos ABIERTOS gestionados por un trabajador
      * @param workerId Identificador del trabajador
      * @return El número de préstamos que ha gestionado
      */
@@ -700,6 +686,77 @@ public class LibraryPR2Impl implements Library {
      */
     private int getConcurrentLoansByReader(String readerId) {
         return this.bookWareHouse.getConcurrentLoansByReader(readerId);
+    }
+
+
+    /***
+     * Función que se usa para decrementar en 1 unidad la cantidad de libros disponibles para un libro concreto
+     * @param bookId Identificador del libro que estamos procesando
+     */
+    private void checkoutBook(String bookId) throws NoBookException {
+        // Primero recuperamos las posiciones ocupadas
+        Traversal<CatalogedBook> iterator = this.bookWareHouse.catalogedBooks.positions();
+        Position<CatalogedBook> positionToUpdate = null;
+
+        // Luego buscamos qué posición ocupa el libro que tenga el bookId que recibimos
+        while(iterator.hasNext()) {
+            Position<CatalogedBook> currentPosition = iterator.next();
+            CatalogedBook currentBook = currentPosition.getElem();
+
+            if(currentBook.getBookId().equals(bookId)) {
+
+                // Si no existen ejemplares suficientes del libro se indicará un error
+                if(currentBook.numCopies() == 0) throw new NoBookException(bundle.getString("exception.NoBookException"));
+
+                positionToUpdate = currentPosition;
+                break;
+            }
+        }
+
+        // Si hemos encontrado la posición, actualizamos dicha posición con un nuevo CatalogedBook con
+        // igual al anterior pero con una copia menos disponible
+        if(positionToUpdate != null) {
+            CatalogedBook oldBook = this.bookWareHouse.catalogedBooks.update(positionToUpdate, new CatalogedBook(
+                    positionToUpdate.getElem().getBookId(),
+                    positionToUpdate.getElem().getTitle(),
+                    positionToUpdate.getElem().getPublisher(),
+                    positionToUpdate.getElem().getEdition(),
+                    positionToUpdate.getElem().getPublicationYear(),
+                    positionToUpdate.getElem().getIsbn(),
+                    positionToUpdate.getElem().getAuthor(),
+                    positionToUpdate.getElem().getTheme(),
+                    positionToUpdate.getElem().numCopies(),
+                    positionToUpdate.getElem().getAvailableCopies() - 1,
+                    positionToUpdate.getElem().getIdWorker()
+            ));
+        }
+    }
+
+
+    /***
+     * Función que se usa para incrementar el número de préstamos del lector
+     * @param loan Es el nuevo préstamo que se lleva el lector
+     */
+    private void increaseLoanReaderCount(Loan loan) {
+        this.bookWareHouse.increaseLoanReaderCount(loan);
+    }
+
+
+    /***
+     * Función que se usa para incrementar el número de préstamos abiertos por un trabajador
+     * @param loan Es el nuevo préstamo abierto
+     */
+    private void increaseOpenLoanWorkerCount(Loan loan) {
+        this.bookWareHouse.increaseOpenLoanWorkerCount(loan);
+    }
+
+
+    /***
+     * Función que se usa para incrementar el número global de préstamos de la biblioteca
+     * @param loan Es el nuevo préstamo abierto
+     */
+    private void incrementTotalLoans(Loan loan) {
+        this.bookWareHouse.incrementTotalLoans(loan);
     }
 
 

@@ -9,12 +9,12 @@ import edu.uoc.ds.adt.sequential.LinkedList;
 public class CatalogedBook extends Book {
 
     // Protected attributes
-    protected int totalCopies;      // Cantidad de ejemplares totales
-    protected int availableCopies;  // Cantidad de ejemplares disponibles
+    private int totalCopies;      // Cantidad de ejemplares totales
+    private int availableCopies;  // Cantidad de ejemplares disponibles
 
     // Este atributo no está en la PEC1, pero creo que es necesario. Nos sirve para saber qué trabajador fue
     // el primero en catalogar un libro
-    protected String  idWorker;
+    private String  idWorker;
 
     public LinkedList<Loan> loans;  // Lista de todos los préstamos de un libro
 
@@ -48,12 +48,31 @@ public class CatalogedBook extends Book {
         this.idWorker = idWorker;
     }
 
+    public int getTotalCopies() {
+        return totalCopies;
+    }
+
+    public LinkedList<Loan> getLoans() {
+        return loans;
+    }
+
+    public void setLoans(LinkedList<Loan> loans) {
+        this.loans = loans;
+    }
+
     /***
-     * Función que devuelve el total de copias que hay de un libro catalogado. Como tengo esta función no añado
+     * Función que devuelve el total de copias DISPONIBLES que hay de un libro catalogado. Como tengo esta función no añado
      * un getter para este atributo
      * @return
      */
     public int numCopies() {
-        return totalCopies;
+        return availableCopies;
+    }
+
+    /***
+     * Función que resta 1 unidad a availableCopies cada vez que se presta un libro
+     */
+    public void decAvailableCopies(){
+        availableCopies--;
     }
 }

@@ -20,13 +20,13 @@ public class BookWareHouse {
     public static final Worker[] workers = new Worker[MAX_NUM_WORKERS];
 
     // Declaro la cola de pilas
-    private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
+    private final QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
 
     // Libros catalogados en general, por todos los trabajadores
     public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
     // Préstamos
-    public static final LinkedList<Loan> loans = new LinkedList<>();
+    public final LinkedList<Loan> loans = new LinkedList<>();
 
 
     // Préstamos de un lector
@@ -92,7 +92,7 @@ public class BookWareHouse {
         int totalCatalogBooks = 0;
 
         // Primero recuperamos el iterador de catalogedBooks
-        Iterator<CatalogedBook> iterator = BookWareHouse.catalogedBooks.values();
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
 
         // Luego recorremos la lista de libros buscando por isbn
         while(iterator.hasNext()) {
@@ -113,7 +113,7 @@ public class BookWareHouse {
 
         int numberBooksCatalogued = 0;
 
-        for(Worker worker : BookWareHouse.workers) {
+        for(Worker worker : workers) {
             if(worker.getId().equals(workerId)) {
                 return worker.getTotalNumberOfCatalogedBooks();
             }
@@ -131,7 +131,7 @@ public class BookWareHouse {
      */
     public int totalCatalogBooksByWorker(String workerId) {
 
-        for(Worker worker : BookWareHouse.workers) {
+        for(Worker worker : workers) {
             if(worker.getId().equals(workerId)) {
                 int dato = worker.getTotalNumberOfProcessedBooks();
                 return worker.getTotalNumberOfProcessedBooks();
@@ -148,7 +148,7 @@ public class BookWareHouse {
      * @param bookToCatalog El libro que ya procesado
      */
     public void addBookToProcessedByWorker(String workerId, Book bookToCatalog) {
-        for(Worker worker : BookWareHouse.workers) {
+        for(Worker worker : workers) {
             if(worker.getId().equals(workerId)) {
                 worker.addBookToProcessedBook(bookToCatalog);
                 return;
@@ -158,14 +158,14 @@ public class BookWareHouse {
 
 
     /***
-     * Función que devuelve la cantidad total de copias que hay en la biblioteca de un libro concreto
+     * Función que devuelve la cantidad total de copias DISPONIBLES que hay en la biblioteca de un libro concreto
      * @param bookId Identificador del libro del que queremos saber cuántas copias tenemos
      * @return Devuelve la cantidad de copias que hay del libro
      */
     public int numCopies(String bookId) {
 
         // Primero recuperamos el iterador de catalogedBooks
-        Iterator<CatalogedBook> iterator = BookWareHouse.catalogedBooks.values();
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
 
         // Luego recorremos la lista de libros buscando por isbn
         while(iterator.hasNext()) {
@@ -183,22 +183,22 @@ public class BookWareHouse {
      * @return Devuelve la cantidad de libros prestados
      */
     public int numLoans() {
-
-        // TODO: PEC1 página 15 -> los libros prestados son una lista encadenada (Linked List)
-
-        return 0;
+        return loans.size();
     }
 
 
     /***
-     * Función que devuelve el número de préstamos gestionados por un trabajador
+     * Función que devuelve el número de préstamos ABIERTOS gestionados por un trabajador
      * @param workerId Identificador del trabajador
      * @return El número de préstamos que ha gestionado
      */
     public int numLoansByWorker(String workerId) {
 
-        // TODO: ver de dónde saco este dato
-
+        for(Worker worker : workers) {
+            if(worker.getId().equals(workerId)) {
+                return worker.getOpenLoans().size();
+            }
+        }
         return 0;
     }
 
@@ -210,8 +210,16 @@ public class BookWareHouse {
      */
     public int numLoansByBook(String bookId) {
 
-        // TODO: ver de dónde saco este dato
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
 
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+            if(catalogedBook.getBookId().equals(bookId)) {
+                return catalogedBook.getLoans().size();
+            }
+        }
         return 0;
     }
 
@@ -223,9 +231,21 @@ public class BookWareHouse {
      */
     public int numCurrentLoansByReader(String readerId) {
 
-        // TODO: ver de dónde saco este dato
+        int numCurrentLoans = 0;
 
-        return 0;
+        // Recorremos el array buscado al lector
+        for(Reader reader : readers) {
+            if(reader != null && reader.getId().equals(readerId)) {
+                Loan[] readerLoans = reader.getConcurrentLoans();
+                for(Loan loan : readerLoans) {
+                    if(loan != null)
+                    {
+                        numCurrentLoans++;
+                    }
+                }
+            }
+        }
+        return numCurrentLoans;
     }
 
 
@@ -429,7 +449,7 @@ public class BookWareHouse {
      */
     public CatalogedBook getBookById(String bookId) {
         // Primero recuperamos el iterador de catalogedBooks
-        Iterator<CatalogedBook> iterator = BookWareHouse.catalogedBooks.values();
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
 
         // Luego recorremos la lista de libros buscando por isbn
         while(iterator.hasNext()) {
@@ -451,7 +471,7 @@ public class BookWareHouse {
     public int getConcurrentLoansByReader(String readerId) {
 
         // Recorremos el array buscado al lector
-        for(Reader reader : BookWareHouse.readers) {
+        for(Reader reader : readers) {
             if(reader != null && reader.getId().equals(readerId)) {
 
                 // Recuperamos el array dónde guardamos los préstamos simultáneos
@@ -470,6 +490,49 @@ public class BookWareHouse {
         }
 
         return 0;
+    }
+
+
+    /***
+     * Función que se usa para incrementar el número de préstamos del lector
+     * @param loan Es el nuevo préstamo que se lleva el lector
+     */
+    public void increaseLoanReaderCount(Loan loan) {
+
+        // Recorremos el array buscando al lector
+        for (int i = 0; i < readers.length; i++) {
+            if(readers[i] != null && readers[i].getId().equals(loan.getReaderId())) {
+                // Añadimos el préstamo al lector
+                readers[i].addNewLoan(loan);
+                return;
+            }
+        }
+    }
+
+
+    /***
+     * Función que se usa para incrementar el número de préstamos abiertos por un trabajador
+     * @param loan Es el nuevo préstamo abierto
+     */
+    public void increaseOpenLoanWorkerCount(Loan loan) {
+
+        // Recorremos el array buscando al trabajador
+        for (int i = 0; i < workers.length; i++) {
+            if(workers[i] != null && workers[i].getId().equals(loan.getWorkerId())) {
+                // Añadimos el préstamo al trabajador
+                workers[i].addLoanToOpenLoans(loan);
+                return;
+            }
+        }
+    }
+
+
+    /***
+     * Función que se usa para incrementar el número global de préstamos de la biblioteca
+     * @param loan Es el nuevo préstamo abierto
+     */
+    public void incrementTotalLoans(Loan loan) {
+        loans.insertEnd(loan);
     }
 
 

@@ -8,16 +8,16 @@ import edu.uoc.ds.adt.sequential.LinkedList;
 public class Worker {
 
     // Attributes
-    public String id;                                   // Identificador del trabajador
-    public String name;                                 // Nombre del trabajador
-    public String surname;                              // Apellido del trabajador
+    private String id;                                   // Identificador del trabajador
+    private String name;                                 // Nombre del trabajador
+    private String surname;                              // Apellido del trabajador
 
-    public LinkedList<Loan> openLoans;                  // Préstamos abiertos por un trabajador
-    public LinkedList<Loan> closedLoans;                // Préstamos cerrados por un trabajador
-    public LinkedList<CatalogedBook> catalogedBooks;    // Libros catalogados por un trabajador
+    private LinkedList<Loan> openLoans;                  // Préstamos abiertos por un trabajador
+    private LinkedList<Loan> closedLoans;                // Préstamos cerrados por un trabajador
+    private LinkedList<CatalogedBook> catalogedBooks;    // Libros catalogados por un trabajador
 
     // Lista de libros que han sido procesados por el trabajador, aunque no le computen como catalogados por él
-    public LinkedList<Book> processedBooks;
+    private LinkedList<Book> processedBooks;
 
 
     // Constructor
@@ -119,6 +119,14 @@ public class Worker {
      */
     public int getTotalNumberOfProcessedBooks() {
         return processedBooks.size();
+    }
+
+    /***
+     * Función que añade un nuevo préstamo a la lista de préstamos abiertos por el trabajador
+     * @param loan Es el nuevo préstamo abierto
+     */
+    public void addLoanToOpenLoans(Loan loan) {
+        this.openLoans.insertEnd(loan);
     }
 
 }

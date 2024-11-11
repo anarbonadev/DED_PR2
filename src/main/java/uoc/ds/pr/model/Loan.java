@@ -1,5 +1,7 @@
 package uoc.ds.pr.model;
 
+import uoc.ds.pr.Library;
+
 import java.time.LocalDate;
 
 /*
@@ -7,17 +9,17 @@ import java.time.LocalDate;
 * */
 public class Loan {
     // Attributes
-    public String loanId;               // Identificador del préstamo
-    public String readerId;             // Identificador del lector
-    public String bookId;               // Identificador del libro
-    public String workerId;             // Identificador del trabajador que lo presta
-    public LocalDate date;              // La fecha del préstamo
-    public LocalDate expirationDate;    // La fecha final de devolución
-    public String state;               // Estado en el que puede estar un préstamo
+    private String loanId;               // Identificador del préstamo
+    private String readerId;             // Identificador del lector
+    private String bookId;               // Identificador del libro
+    private String workerId;             // Identificador del trabajador que lo presta
+    private LocalDate date;              // La fecha del préstamo
+    private LocalDate expirationDate;    // La fecha final de devolución
+    private Library.LoanState state;               // Estado en el que puede estar un préstamo
 
 
     // Conctructor
-    public Loan(String loanId, String readerId, String bookId, String workerId, LocalDate date, LocalDate expirationDate, String state) {
+    public Loan(String loanId, String readerId, String bookId, String workerId, LocalDate date, LocalDate expirationDate, Library.LoanState state) {
         this.loanId = loanId;
         this.readerId = readerId;
         this.bookId = bookId;
@@ -76,11 +78,11 @@ public class Loan {
         this.expirationDate = expirationDate;
     }
 
-    public String getState() {
+    public Library.LoanState getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(Library.LoanState state) {
         this.state = state;
     }
 

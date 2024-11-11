@@ -11,6 +11,7 @@ public class StoredBook extends Book {
     }
 
     public StoredBook(Book book) {
-        super(book.bookId, book.title, book.publisher, book.edition, book.publicationYear, book.isbn, book.author, book.theme);
+        super(book.getBookId(), book.getTitle(), book.getPublisher(), book.getEdition(), book.getPublicationYear()
+                , book.getIsbn(), book.getAuthor(), book.getTheme());
     }
 }
