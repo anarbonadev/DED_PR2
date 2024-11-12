@@ -209,9 +209,9 @@ public class LibraryPR2Impl implements Library {
         // Instanciamos el objeto de tipo Loan. El préstamo se marca como “En trámite”
         Loan loan = new Loan(loanId, readerId, bookId, workerId, date, expirationDate, LoanState.INPROGRESS);
 
-        // El número de ejemplares del libro disponibles desciende en una unidad
-        // TODO: pasarle a este método el Loan en lugar del BookId para que a la vez que decremento un contador, añadir el libro a los préstamos
-        checkoutBook(bookId);
+        // El número de ejemplares del libro disponibles desciende en una unidad y se añade a la lista de préstamos
+        // un nuevo préstamo
+        checkoutBook(loan);
 
         // El número de préstamos del lector será el mismo más una unidad
         increaseLoanReaderCount(loan);
@@ -690,10 +690,11 @@ public class LibraryPR2Impl implements Library {
 
 
     /***
-     * Función que se usa para decrementar en 1 unidad la cantidad de libros disponibles para un libro concreto
-     * @param bookId Identificador del libro que estamos procesando
+     * Función que se usa para decrementar en 1 unidad la cantidad de libros disponibles para un libro concreto y añadir
+     * ese préstamo a la lista de préstamos del libro
+     * @param loan Es el nuevo préstamo que se lleva el lector
      */
-    private void checkoutBook(String bookId) throws NoBookException {
+    private void checkoutBook(Loan loan) throws NoBookException {
         // Primero recuperamos las posiciones ocupadas
         Traversal<CatalogedBook> iterator = this.bookWareHouse.catalogedBooks.positions();
         Position<CatalogedBook> positionToUpdate = null;
@@ -703,7 +704,7 @@ public class LibraryPR2Impl implements Library {
             Position<CatalogedBook> currentPosition = iterator.next();
             CatalogedBook currentBook = currentPosition.getElem();
 
-            if(currentBook.getBookId().equals(bookId)) {
+            if(currentBook.getBookId().equals(loan.getBookId())) {
 
                 // Si no existen ejemplares suficientes del libro se indicará un error
                 if(currentBook.numCopies() == 0) throw new NoBookException(bundle.getString("exception.NoBookException"));
@@ -716,7 +717,8 @@ public class LibraryPR2Impl implements Library {
         // Si hemos encontrado la posición, actualizamos dicha posición con un nuevo CatalogedBook con
         // igual al anterior pero con una copia menos disponible
         if(positionToUpdate != null) {
-            CatalogedBook oldBook = this.bookWareHouse.catalogedBooks.update(positionToUpdate, new CatalogedBook(
+
+            CatalogedBook newBook = new CatalogedBook(
                     positionToUpdate.getElem().getBookId(),
                     positionToUpdate.getElem().getTitle(),
                     positionToUpdate.getElem().getPublisher(),
@@ -727,8 +729,14 @@ public class LibraryPR2Impl implements Library {
                     positionToUpdate.getElem().getTheme(),
                     positionToUpdate.getElem().numCopies(),
                     positionToUpdate.getElem().getAvailableCopies() - 1,
-                    positionToUpdate.getElem().getIdWorker()
-            ));
+                    positionToUpdate.getElem().getIdWorker(),
+                    positionToUpdate.getElem().getLoans()
+            );
+
+            // Añado el nuevo préstamo del libro
+            newBook.addnewLoanToLoans(loan);
+
+            CatalogedBook oldBook = this.bookWareHouse.catalogedBooks.update(positionToUpdate, newBook);
         }
     }
 

@@ -25,6 +25,17 @@ public class CatalogedBook extends Book {
         this.totalCopies = totalCopies;
         this.availableCopies = availableCopies;
         this.idWorker = idWorker;
+        this.loans = new LinkedList();
+    }
+
+    public CatalogedBook(String bookId, String title, String publisher, String edition, int publicationYear
+            , String isbn, String author, String theme, int totalCopies, int availableCopies, String idWorker
+            , LinkedList<Loan> loans) {
+        super(bookId, title, publisher, edition, publicationYear, isbn, author, theme);
+        this.totalCopies = totalCopies;
+        this.availableCopies = availableCopies;
+        this.idWorker = idWorker;
+        this.loans = loans;
     }
 
     // Getters & Setters
@@ -70,9 +81,10 @@ public class CatalogedBook extends Book {
     }
 
     /***
-     * Función que resta 1 unidad a availableCopies cada vez que se presta un libro
+     * Función que añade un nuevo préstamo a la lista de préstamos del libro
+     * @param loan
      */
-    public void decAvailableCopies(){
-        availableCopies--;
+    public void addnewLoanToLoans(Loan loan) {
+        this.loans.insertEnd(loan);
     }
 }
