@@ -23,6 +23,19 @@ public class LibraryPR2Impl implements Library {
      * Attributes
      */
 
+    // Lectores
+    public final Reader[] readers = new Reader[MAX_NUM_READERS];
+
+    // Trabajadores
+    public static final Worker[] workers = new Worker[MAX_NUM_WORKERS];
+
+    // Libros catalogados en general, por todos los trabajadores
+    public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
+
+    // Préstamos
+    public final LinkedList<Loan> loans = new LinkedList<>();
+
+
     // BookWareHouse controla todo lo referente al sistema de recepción de libros, procesamiento, colas, pilas...
     private BookWareHouse bookWareHouse;
 
@@ -193,9 +206,7 @@ public class LibraryPR2Impl implements Library {
     public void lendBook(String loanId, String readerId, String bookId, String workerId, LocalDate date, LocalDate expirationDate) throws ReaderNotFoundException, BookNotFoundException, WorkerNotFoundException, NoBookException, MaximumNumberOfBooksException {
 
         // Si el lector no existe se indicará un error
-        if(getReader(readerId) == null) {
-            throw new ReaderNotFoundException(bundle.getString("exception.ReaderNotFoundException"));
-        }
+        if(getReader(readerId) == null) throw new ReaderNotFoundException(bundle.getString("exception.ReaderNotFoundException"));
 
         // Si no exíste el trabajador se indicará un error
         if(getWorker(workerId) == null) throw new WorkerNotFoundException(bundle.getString("exception.WorkerNotFoundException"));
@@ -225,11 +236,37 @@ public class LibraryPR2Impl implements Library {
 
     }
 
-
+    /***
+     * Función que se usa para que un lector devuelve un libro que tenía en préstamo
+     * @param loanId Identificador del préstamo
+     * @param date Fecha en la que se devuelve el libro
+     * @return
+     * @throws LoanNotFoundException Excepción que salta si no exíste el préstamo
+     */
     @Override
     public Loan giveBackBook(String loanId, LocalDate date) throws LoanNotFoundException {
+
+        // Recupero el préstamo
+        Loan loan = getLoanById(loanId);
+
+        // Si no existe el préstamo se indicará un error
+        if(loan == null) throw new LoanNotFoundException(bundle.getString("exception.LoanNotFoundException"));
+
+        // Si la fecha de devolución es anterior a la fecha final de devolución se marcará el préstamo como “Completado”
+        // Si la fecha de devolución es posterior a la fecha final de devolución se marcará el préstamo como “Retrasado”
+        if(loan.getExpirationDate().isAfter(date)) loan.setState(LoanState.COMPLETED);
+        else loan.setState(LoanState.DELAYED);
+
+        // El número de préstamos cerrados de un lector será el mismo más una unidad
+        markLoanAsReturnedByReader(loan);
+
+
+        // El número de préstamos cerrados realizados por el trabajador que gestionó el préstamo será el mismo más una unidad
+        markLoanAsReturnedByWorker(loan);
+
         return null;
     }
+
 
     @Override
     public int timeToBeCataloged(String bookId, int lotPreparationTime, int bookCatalogTime) throws BookNotFoundException, InvalidLotPreparationTimeException, InvalidCatalogTimeException {
@@ -281,7 +318,7 @@ public class LibraryPR2Impl implements Library {
     @Override
     public Reader getReader(String id) {
         // Recorremos el array buscado si existe un reader con el id dado
-        for(Reader reader : BookWareHouse.readers) {
+        for(Reader reader : readers) {
             if(reader != null && reader.getId().equals(id)) {
                 // Si se encuentra, devolvemos ese reader
                 return reader;
@@ -301,7 +338,7 @@ public class LibraryPR2Impl implements Library {
     public int numReaders() {
         int totalReaders = 0;
 
-        for(Reader reader : BookWareHouse.readers) {
+        for(Reader reader : readers) {
             if(reader != null) {
                 totalReaders++;
             }
@@ -319,7 +356,7 @@ public class LibraryPR2Impl implements Library {
     @Override
     public Worker getWorker(String id) {
         // Recorremos el array buscado si existe un reader con el id dado
-        for(Worker worker : BookWareHouse.workers) {
+        for(Worker worker : workers) {
             if(worker != null && worker.getId().equals(id)) {
                 // Si se encuentra, devolvemos ese worker
                 return worker;
@@ -339,7 +376,7 @@ public class LibraryPR2Impl implements Library {
     public int numWorkers() {
         int totalWorkers = 0;
 
-        for(Worker worker : BookWareHouse.workers) {
+        for(Worker worker : workers) {
             if(worker != null) {
                 totalWorkers++;
             }
@@ -376,7 +413,20 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numCatalogBooks() {
-        return this.bookWareHouse.numCatalogBooks();
+
+        int totalCatalogBooks = 0;
+
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
+
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+            totalCatalogBooks = totalCatalogBooks + catalogedBook.numCopies();
+        }
+        return totalCatalogBooks;
+
+        //return this.bookWareHouse.numCatalogBooks();
     }
 
     /***
@@ -388,7 +438,18 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numCatalogBooksInWorker(String workerId) {
-        return this.bookWareHouse.numCatalogBooksInWorker(workerId);
+
+        int numberBooksCatalogued = 0;
+
+        for(Worker worker : workers) {
+            if(worker.getId().equals(workerId)) {
+                return worker.getTotalNumberOfCatalogedBooks();
+            }
+
+        }
+        return 0;
+
+        //return this.bookWareHouse.numCatalogBooksInWorker(workerId);
     }
 
     /***
@@ -399,7 +460,17 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int totalCatalogBooksByWorker(String workerId) {
-        return this.bookWareHouse.totalCatalogBooksByWorker(workerId);
+
+        for(Worker worker : workers) {
+            if(worker.getId().equals(workerId)) {
+                int dato = worker.getTotalNumberOfProcessedBooks();
+                return worker.getTotalNumberOfProcessedBooks();
+            }
+        }
+
+        return 0;
+
+        //return this.bookWareHouse.totalCatalogBooksByWorker(workerId);
     }
 
     /***
@@ -409,7 +480,20 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numCopies(String bookId) {
-        return this.bookWareHouse.numCopies(bookId);
+
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
+
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+            if(catalogedBook.getBookId().equals(bookId)) {
+                return catalogedBook.numCopies();
+            }
+        }
+        return 0;
+
+        //return this.bookWareHouse.numCopies(bookId);
     }
 
 
@@ -419,7 +503,10 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numLoans() {
-        return this.bookWareHouse.numLoans();
+
+        return loans.size();
+
+        //return this.bookWareHouse.numLoans();
     }
 
 
@@ -430,7 +517,15 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numLoansByWorker(String workerId) {
-        return this.bookWareHouse.numLoansByWorker(workerId);
+
+        for(Worker worker : workers) {
+            if(worker.getId().equals(workerId)) {
+                return worker.getOpenLoans().size();
+            }
+        }
+        return 0;
+
+        //return this.bookWareHouse.numLoansByWorker(workerId);
     }
 
 
@@ -441,7 +536,20 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numLoansByBook(String bookId) {
-        return this.bookWareHouse.numLoansByBook(bookId);
+
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
+
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+            if(catalogedBook.getBookId().equals(bookId)) {
+                return catalogedBook.getLoans().size();
+            }
+        }
+        return 0;
+
+        //return this.bookWareHouse.numLoansByBook(bookId);
     }
 
 
@@ -452,7 +560,23 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numCurrentLoansByReader(String readerId) {
-        return this.bookWareHouse.numCurrentLoansByReader(readerId);
+        int numCurrentLoans = 0;
+
+        // Recorremos el array buscado al lector
+        for(Reader reader : readers) {
+            if(reader != null && reader.getId().equals(readerId)) {
+                Loan[] readerLoans = reader.getConcurrentLoans();
+                for(Loan loan : readerLoans) {
+                    if(loan != null)
+                    {
+                        numCurrentLoans++;
+                    }
+                }
+            }
+        }
+        return numCurrentLoans;
+
+        //return this.bookWareHouse.numCurrentLoansByReader(readerId);
     }
 
 
@@ -489,7 +613,7 @@ public class LibraryPR2Impl implements Library {
     private boolean isReadersArrayFull(){
         int size = 0;
 
-        for (Reader reader : BookWareHouse.readers) {
+        for (Reader reader : readers) {
             if(reader != null){
                 size++;
             }
@@ -510,14 +634,14 @@ public class LibraryPR2Impl implements Library {
      */
     private void updateReader(Reader readerUpsert) {
         // Recorremos el array buscando el reader a actualizar
-        for(int i = 0 ; i < BookWareHouse.readers.length; i++) {
-            if(BookWareHouse.readers[i] != null && BookWareHouse.readers[i].getId().equals(readerUpsert.getId())) {
-                BookWareHouse.readers[i].setName(readerUpsert.getName());
-                BookWareHouse.readers[i].setSurname(readerUpsert.getSurname());
-                BookWareHouse.readers[i].setDocId(readerUpsert.getDocId());
-                BookWareHouse.readers[i].setBirthDate(readerUpsert.getBirthDate());
-                BookWareHouse.readers[i].setBirthPlace(readerUpsert.getBirthPlace());
-                BookWareHouse.readers[i].setAddress(readerUpsert.getAddress());
+        for(int i = 0 ; i < readers.length; i++) {
+            if(readers[i] != null && readers[i].getId().equals(readerUpsert.getId())) {
+                readers[i].setName(readerUpsert.getName());
+                readers[i].setSurname(readerUpsert.getSurname());
+                readers[i].setDocId(readerUpsert.getDocId());
+                readers[i].setBirthDate(readerUpsert.getBirthDate());
+                readers[i].setBirthPlace(readerUpsert.getBirthPlace());
+                readers[i].setAddress(readerUpsert.getAddress());
 
             }
         }
@@ -538,9 +662,9 @@ public class LibraryPR2Impl implements Library {
         readerUpsert.setConcurrentLoans(concurrentLoans);
 
         // Recorremos el array buscando el primer hueco dónde insertar el reader
-        for(int i = 0 ; i < BookWareHouse.readers.length; i++) {
-            if(BookWareHouse.readers[i] == null){
-                BookWareHouse.readers[i] = readerUpsert;
+        for(int i = 0 ; i < readers.length; i++) {
+            if(readers[i] == null){
+                readers[i] = readerUpsert;
                 break;
             }
         }
@@ -555,7 +679,7 @@ public class LibraryPR2Impl implements Library {
     private boolean isWorkersArrayFull(){
         int size = 0;
 
-        for (Worker worker : BookWareHouse.workers) {
+        for (Worker worker : workers) {
             if(worker != null){
                 size++;
             }
@@ -576,10 +700,10 @@ public class LibraryPR2Impl implements Library {
      */
     private void updateWorkerQuantityOfBooksCatalogued(Worker workerUpsert) {
         // Recorremos el array buscando el worker a actualizar
-        for(int i = 0 ; i < BookWareHouse.workers.length; i++) {
-            if(BookWareHouse.workers[i] != null && BookWareHouse.workers[i].getId().equals(workerUpsert.getId())) {
-                BookWareHouse.workers[i].setName(workerUpsert.getName());
-                BookWareHouse.workers[i].setSurname(workerUpsert.getSurname());
+        for(int i = 0 ; i < workers.length; i++) {
+            if(workers[i] != null && workers[i].getId().equals(workerUpsert.getId())) {
+                workers[i].setName(workerUpsert.getName());
+                workers[i].setSurname(workerUpsert.getSurname());
             }
         }
     }
@@ -591,9 +715,9 @@ public class LibraryPR2Impl implements Library {
      */
     private void insertWorker(Worker workerUpsert) {
         // Recorremos el array buscando el primer hueco dónde insertar el reader
-        for(int i = 0 ; i < BookWareHouse.workers.length; i++) {
-            if(BookWareHouse.workers[i] == null){
-                BookWareHouse.workers[i] = workerUpsert;
+        for(int i = 0 ; i < workers.length; i++) {
+            if(workers[i] == null){
+                workers[i] = workerUpsert;
                 break;
             }
         }
@@ -608,9 +732,9 @@ public class LibraryPR2Impl implements Library {
     private void addToWorkerCatalog(String workerId, CatalogedBook catalogedBook)
     {
         // Buscamos el trabajador dentro del array
-        for (int i = 0; i < BookWareHouse.workers.length; i++) {
-            if(BookWareHouse.workers[i] != null && BookWareHouse.workers[i].getId().equals(workerId)) {
-                BookWareHouse.workers[i].addToWorkerCatalog(catalogedBook);
+        for (int i = 0; i < workers.length; i++) {
+            if(workers[i] != null && workers[i].getId().equals(workerId)) {
+                workers[i].addToWorkerCatalog(catalogedBook);
                 break;
             }
         }
@@ -629,7 +753,7 @@ public class LibraryPR2Impl implements Library {
         CatalogedBookResult catalogedBookResult = null;
 
         // Primero recuperamos el iterador de catalogedBooks
-        Iterator<CatalogedBook> iterator = BookWareHouse.catalogedBooks.values();
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
 
         // Luego recorremos la lista de libros buscando por isbn
         while(iterator.hasNext()) {
@@ -650,7 +774,7 @@ public class LibraryPR2Impl implements Library {
                 , bookToCatalog.getPublisher(), bookToCatalog.getEdition(), bookToCatalog.getPublicationYear()
                 , bookToCatalog.getIsbn(), bookToCatalog.getAuthor(), bookToCatalog.getTheme()
                 , 1, 1, workerId);
-        BookWareHouse.catalogedBooks.insertEnd(catalogedBook);
+        catalogedBooks.insertEnd(catalogedBook);
 
         catalogedBookResult = new CatalogedBookResult(false, catalogedBook);
 
@@ -664,7 +788,15 @@ public class LibraryPR2Impl implements Library {
      * @param bookToCatalog El libro que ya procesado
      */
     private void addBookToProcessedByWorker(String workerId, Book bookToCatalog) {
-        this.bookWareHouse.addBookToProcessedByWorker(workerId, bookToCatalog);
+
+        for(Worker worker : workers) {
+            if(worker.getId().equals(workerId)) {
+                worker.addBookToProcessedBook(bookToCatalog);
+                return;
+            }
+        }
+
+        //this.bookWareHouse.addBookToProcessedByWorker(workerId, bookToCatalog);
     }
 
 
@@ -674,7 +806,20 @@ public class LibraryPR2Impl implements Library {
      * @return Devuelve la información del libro si lo encuentra
      */
     private CatalogedBook getBookById(String bookId) {
-        return this.bookWareHouse.getBookById(bookId);
+
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
+
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+            if(catalogedBook.getBookId().equals(bookId)) {
+                return catalogedBook;
+            }
+        }
+        return null;
+
+        //return this.bookWareHouse.getBookById(bookId);
     }
 
 
@@ -685,7 +830,29 @@ public class LibraryPR2Impl implements Library {
      * @return Devuelve la cantidad de préstamos simultáneos del lector
      */
     private int getConcurrentLoansByReader(String readerId) {
-        return this.bookWareHouse.getConcurrentLoansByReader(readerId);
+
+        // Recorremos el array buscado al lector
+        for(Reader reader : readers) {
+            if(reader != null && reader.getId().equals(readerId)) {
+
+                // Recuperamos el array dónde guardamos los préstamos simultáneos
+                Loan[] concurrentLoans = reader.getConcurrentLoans();
+
+                int totalConcurrentLoans = 0;
+
+                for(Loan loan : concurrentLoans) {
+                    if(loan != null) {
+                        totalConcurrentLoans++;
+                    }
+                }
+
+                return totalConcurrentLoans;
+            }
+        }
+
+        return 0;
+
+        //return this.bookWareHouse.getConcurrentLoansByReader(readerId);
     }
 
 
@@ -696,7 +863,7 @@ public class LibraryPR2Impl implements Library {
      */
     private void checkoutBook(Loan loan) throws NoBookException {
         // Primero recuperamos las posiciones ocupadas
-        Traversal<CatalogedBook> iterator = this.bookWareHouse.catalogedBooks.positions();
+        Traversal<CatalogedBook> iterator = catalogedBooks.positions();
         Position<CatalogedBook> positionToUpdate = null;
 
         // Luego buscamos qué posición ocupa el libro que tenga el bookId que recibimos
@@ -736,7 +903,7 @@ public class LibraryPR2Impl implements Library {
             // Añado el nuevo préstamo del libro
             newBook.addnewLoanToLoans(loan);
 
-            CatalogedBook oldBook = this.bookWareHouse.catalogedBooks.update(positionToUpdate, newBook);
+            CatalogedBook oldBook = catalogedBooks.update(positionToUpdate, newBook);
         }
     }
 
@@ -746,7 +913,17 @@ public class LibraryPR2Impl implements Library {
      * @param loan Es el nuevo préstamo que se lleva el lector
      */
     private void increaseLoanReaderCount(Loan loan) {
-        this.bookWareHouse.increaseLoanReaderCount(loan);
+
+        // Recorremos el array buscando al lector
+        for (int i = 0; i < readers.length; i++) {
+            if(readers[i] != null && readers[i].getId().equals(loan.getReaderId())) {
+                // Añadimos el préstamo al lector
+                readers[i].addNewLoan(loan);
+                return;
+            }
+        }
+
+        //this.bookWareHouse.increaseLoanReaderCount(loan);
     }
 
 
@@ -755,7 +932,17 @@ public class LibraryPR2Impl implements Library {
      * @param loan Es el nuevo préstamo abierto
      */
     private void increaseOpenLoanWorkerCount(Loan loan) {
-        this.bookWareHouse.increaseOpenLoanWorkerCount(loan);
+
+        // Recorremos el array buscando al trabajador
+        for (int i = 0; i < workers.length; i++) {
+            if(workers[i] != null && workers[i].getId().equals(loan.getWorkerId())) {
+                // Añadimos el préstamo al trabajador
+                workers[i].addLoanToOpenLoans(loan);
+                return;
+            }
+        }
+
+        //this.bookWareHouse.increaseOpenLoanWorkerCount(loan);
     }
 
 
@@ -764,7 +951,152 @@ public class LibraryPR2Impl implements Library {
      * @param loan Es el nuevo préstamo abierto
      */
     private void incrementTotalLoans(Loan loan) {
-        this.bookWareHouse.incrementTotalLoans(loan);
+
+        loans.insertEnd(loan);
+
+        //this.bookWareHouse.incrementTotalLoans(loan);
+    }
+
+
+    /***
+     * Función que comprueba si exíste un préstamo en la colección de préstamos de la biblioteca
+     * @param loanId Identificador del préstamo
+     * @return Es el préstamo que estamos buscando
+     */
+    private Loan getLoanById(String loanId) {
+
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<Loan> iterator = loans.values();
+
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            Loan loan = iterator.next();
+
+            if(loan.getLoanId().equals(loanId)) {
+                return loan;
+            }
+        }
+        return null;
+    }
+
+
+    /***
+     * Función que actualiza la lista de préstamos de un lector
+     * @param loan Es el préstamo que estamos procesando
+     */
+    private void markLoanAsReturnedByReader(Loan loan) {
+
+        // Primero recupero el lector que tiene este préstamo
+        Reader reader = getReader(loan.getReaderId());
+
+        // Actualizo la lista de préstamos del lector
+        LinkedList<Loan> readerLoans = updateReaderLoans(loan);
+
+        // Busco el préstamo en la lista de préstamos concurrentes del lector y lo elimino
+        Loan[] newConcurrentLoans = removeLoanFronLoanList(loan);
+
+
+        // Actualizo la lista de préstamos del lector con esta nuevo lista
+        reader.setLoans(readerLoans);
+
+        // Actualizo la lista de préstamos concurrentes del lector con la nueva lista
+        reader.setConcurrentLoans(newConcurrentLoans);
+
+        // Actualizo al lector dentro del vector de lectores
+        // TODO: comprobar que esta función es capaz de actualizar la lista de préstamos y el array
+        updateReader(reader);
+
+
+
+    }
+
+
+    /***
+     * Función que buscar el préstamo en la lista de préstamos del lector para actualizar su estado
+     * @param loan Es el préstamo que estamos procesando
+     */
+    private LinkedList<Loan> updateReaderLoans(Loan loan) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Primero recuperamos las posiciones ocupadas
+        Traversal<CatalogedBook> iterator = catalogedBooks.positions();
+        Position<CatalogedBook> positionToUpdate = null;
+
+        // Luego buscamos qué posición ocupa el libro que tenga el bookId que recibimos
+        while(iterator.hasNext()) {
+            Position<CatalogedBook> currentPosition = iterator.next();
+            CatalogedBook currentBook = currentPosition.getElem();
+
+            if(currentBook.getBookId().equals(loan.getBookId())) {
+
+                // Si no existen ejemplares suficientes del libro se indicará un error
+                if(currentBook.numCopies() == 0) throw new NoBookException(bundle.getString("exception.NoBookException"));
+
+                positionToUpdate = currentPosition;
+                break;
+            }
+        }
+
+        // Si hemos encontrado la posición, actualizamos dicha posición con un nuevo CatalogedBook con
+        // igual al anterior pero con una copia menos disponible
+        if(positionToUpdate != null) {
+
+            CatalogedBook newBook = new CatalogedBook(
+                    positionToUpdate.getElem().getBookId(),
+                    positionToUpdate.getElem().getTitle(),
+                    positionToUpdate.getElem().getPublisher(),
+                    positionToUpdate.getElem().getEdition(),
+                    positionToUpdate.getElem().getPublicationYear(),
+                    positionToUpdate.getElem().getIsbn(),
+                    positionToUpdate.getElem().getAuthor(),
+                    positionToUpdate.getElem().getTheme(),
+                    positionToUpdate.getElem().numCopies(),
+                    positionToUpdate.getElem().getAvailableCopies() - 1,
+                    positionToUpdate.getElem().getIdWorker(),
+                    positionToUpdate.getElem().getLoans()
+            );
+
+            // Añado el nuevo préstamo del libro
+            newBook.addnewLoanToLoans(loan);
+
+            CatalogedBook oldBook = catalogedBooks.update(positionToUpdate, newBook);
+        }
+
+
+    }
+
+
+    /***
+     * Función que busca un préstamo en la lista de préstamos concurrentes de un lector y lo elimina
+     * @param loan Es el préstamo que estamos procesando
+     * @return La nueva lista de préstamos concurrentes del lector
+     */
+    private Loan[] removeLoanFronLoanList(Loan loan) {
+
+
+
+
+
+    }
+
+
+    /***
+     * Función que actualiza la lista de préstamos de un trabajador
+     * @param loan Es el préstamo que estamos procesando
+     */
+    private void markLoanAsReturnedByWorker(Loan loan) {
     }
 
 

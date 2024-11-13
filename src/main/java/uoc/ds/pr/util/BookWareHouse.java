@@ -14,22 +14,21 @@ public class BookWareHouse {
      */
 
     // Lectores
-    public static final Reader[] readers = new Reader[MAX_NUM_READERS];
+    //public static final Reader[] readers = new Reader[MAX_NUM_READERS];
 
     // Trabajadores
-    public static final Worker[] workers = new Worker[MAX_NUM_WORKERS];
+    //public static final Worker[] workers = new Worker[MAX_NUM_WORKERS];
 
     // Declaro la cola de pilas
     private final QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
 
     // Libros catalogados en general, por todos los trabajadores
-    public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
+    //public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
     // Préstamos
-    public final LinkedList<Loan> loans = new LinkedList<>();
+    //public final LinkedList<Loan> loans = new LinkedList<>();
 
 
-    // Préstamos de un lector
 
 
 
@@ -87,6 +86,7 @@ public class BookWareHouse {
      * totalCopies de todos los libros catalogados
      * @return Devuelve la cantidad total de libros catalogados
      */
+    /*
     public int numCatalogBooks() {
 
         int totalCatalogBooks = 0;
@@ -101,6 +101,7 @@ public class BookWareHouse {
         }
         return totalCatalogBooks;
     }
+    */
 
     /***
      * Función que devuelve la cantidad de libros catalogados por un trabajador. Se consideran catalogados por un
@@ -109,6 +110,7 @@ public class BookWareHouse {
      * @param workerId Identificador del trabajador
      * @return Devuelve la cantidad total de libros catalogados por el trabajador
      */
+    /*
     public int numCatalogBooksInWorker(String workerId) {
 
         int numberBooksCatalogued = 0;
@@ -121,6 +123,7 @@ public class BookWareHouse {
         }
         return 0;
     }
+    */
 
 
     /***
@@ -129,6 +132,7 @@ public class BookWareHouse {
      * @param workerId Identificador del trabajador
      * @return Devuelve la cantidad total de libros procesados por el trabajador
      */
+    /*
     public int totalCatalogBooksByWorker(String workerId) {
 
         for(Worker worker : workers) {
@@ -140,6 +144,7 @@ public class BookWareHouse {
 
         return 0;
     }
+    */
 
 
     /***
@@ -147,6 +152,7 @@ public class BookWareHouse {
      * @param workerId Identificador del trabajador
      * @param bookToCatalog El libro que ya procesado
      */
+    /*
     public void addBookToProcessedByWorker(String workerId, Book bookToCatalog) {
         for(Worker worker : workers) {
             if(worker.getId().equals(workerId)) {
@@ -155,6 +161,7 @@ public class BookWareHouse {
             }
         }
     }
+    */
 
 
     /***
@@ -162,6 +169,7 @@ public class BookWareHouse {
      * @param bookId Identificador del libro del que queremos saber cuántas copias tenemos
      * @return Devuelve la cantidad de copias que hay del libro
      */
+    /*
     public int numCopies(String bookId) {
 
         // Primero recuperamos el iterador de catalogedBooks
@@ -176,15 +184,18 @@ public class BookWareHouse {
         }
         return 0;
     }
+    */
 
 
     /***
      * Función que devuelve la cantidad de libros que se han prestado en total
      * @return Devuelve la cantidad de libros prestados
      */
+    /*
     public int numLoans() {
         return loans.size();
     }
+    */
 
 
     /***
@@ -192,6 +203,7 @@ public class BookWareHouse {
      * @param workerId Identificador del trabajador
      * @return El número de préstamos que ha gestionado
      */
+    /*
     public int numLoansByWorker(String workerId) {
 
         for(Worker worker : workers) {
@@ -201,6 +213,7 @@ public class BookWareHouse {
         }
         return 0;
     }
+    */
 
 
     /***
@@ -208,6 +221,7 @@ public class BookWareHouse {
      * @param bookId Identificador del libro
      * @return El número de copias que hay prestadas
      */
+    /*
     public int numLoansByBook(String bookId) {
 
         // Primero recuperamos el iterador de catalogedBooks
@@ -222,6 +236,7 @@ public class BookWareHouse {
         }
         return 0;
     }
+    */
 
 
     /***
@@ -229,6 +244,7 @@ public class BookWareHouse {
      * @param readerId Identificador del lector
      * @return El número de copias que tiene un lector en préstamo
      */
+    /*
     public int numCurrentLoansByReader(String readerId) {
 
         int numCurrentLoans = 0;
@@ -247,6 +263,7 @@ public class BookWareHouse {
         }
         return numCurrentLoans;
     }
+    */
 
 
     /***
@@ -447,6 +464,7 @@ public class BookWareHouse {
      * @param bookId Identificador del libro que estamos buscando
      * @return Devuelve la información del libro si lo encuentra
      */
+    /*
     public CatalogedBook getBookById(String bookId) {
         // Primero recuperamos el iterador de catalogedBooks
         Iterator<CatalogedBook> iterator = catalogedBooks.values();
@@ -460,6 +478,7 @@ public class BookWareHouse {
         }
         return null;
     }
+    */
 
 
     /***
@@ -468,6 +487,7 @@ public class BookWareHouse {
      * @param readerId Identificador del lector
      * @return Devuelve la cantidad de préstamos simultáneos del lector
      */
+    /*
     public int getConcurrentLoansByReader(String readerId) {
 
         // Recorremos el array buscado al lector
@@ -491,12 +511,14 @@ public class BookWareHouse {
 
         return 0;
     }
+    */
 
 
     /***
      * Función que se usa para incrementar el número de préstamos del lector
      * @param loan Es el nuevo préstamo que se lleva el lector
      */
+    /*
     public void increaseLoanReaderCount(Loan loan) {
 
         // Recorremos el array buscando al lector
@@ -508,12 +530,14 @@ public class BookWareHouse {
             }
         }
     }
+    */
 
 
     /***
      * Función que se usa para incrementar el número de préstamos abiertos por un trabajador
      * @param loan Es el nuevo préstamo abierto
      */
+    /*
     public void increaseOpenLoanWorkerCount(Loan loan) {
 
         // Recorremos el array buscando al trabajador
@@ -525,15 +549,18 @@ public class BookWareHouse {
             }
         }
     }
+    */
 
 
     /***
      * Función que se usa para incrementar el número global de préstamos de la biblioteca
      * @param loan Es el nuevo préstamo abierto
      */
+    /*
     public void incrementTotalLoans(Loan loan) {
         loans.insertEnd(loan);
     }
+    */
 
 
     /***********************************************************************************/
