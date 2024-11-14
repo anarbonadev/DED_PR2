@@ -5,11 +5,13 @@ import java.util.ResourceBundle;
 
 import edu.uoc.ds.adt.helpers.Position;
 import edu.uoc.ds.adt.sequential.LinkedList;
+import edu.uoc.ds.adt.sequential.StackArrayImpl;
 import edu.uoc.ds.traversal.Iterator;
 import edu.uoc.ds.traversal.Traversal;
 import uoc.ds.pr.exceptions.*;
 import uoc.ds.pr.model.*;
 import uoc.ds.pr.util.BookWareHouse;
+import uoc.ds.pr.util.QueueLinkedList;
 
 
 public class LibraryPR2Impl implements Library {
@@ -274,6 +276,45 @@ public class LibraryPR2Impl implements Library {
 
     @Override
     public int timeToBeCataloged(String bookId, int lotPreparationTime, int bookCatalogTime) throws BookNotFoundException, InvalidLotPreparationTimeException, InvalidCatalogTimeException {
+
+        // Recuperamos la posición que ocupa el libro dentro de la cola de pilas
+        BookWareHouse.Position position = bookWareHouse.new Position(0, 0);
+        position = bookWareHouse.getPosition(bookId);
+
+        // Si el libro no existe se indicará un error
+        if(position.getNumStack() == -1) throw new BookNotFoundException(bundle.getString("exception.BookNotFoundException"));
+
+        // Si el tiempo medio de preparación de un montón no es un número o es menor que cero se indica un error
+        if(lotPreparationTime < 0) throw new InvalidLotPreparationTimeException(bundle.getString("exception.InvalidLotPreparationTimeException"));
+
+        // Si el tiempo medio de catalogación de un libro no es un número o es menor que cero se indica un error
+        if(bookCatalogTime < 0) throw new InvalidCatalogTimeException(bundle.getString("exception.InvalidCatalogTimeException"));
+
+        // Calculamos el tiempo que se tarda en catalogar el libro
+
+        // Tiempo para catalogar los 10 libros de los montones previos. Al número de la pila en el que se encuentra el
+        // libro, le sumo 1 porque las posiciones de las pilas dentro de la cola empieza en 0
+        // El libro HP4a estaría en la segunda pila dentro de la cola. Aunque según BooksData estaría en la tercera pila,
+        // al ejecutar la función catalogBookTest() se han catalogado los 10 libros de la primera pila
+
+        // Primera pila
+        int tPrimeraPila = lotPreparationTime * position.getNumStack();
+
+        // Tiempo preparar los libros de la primera pila
+        int tLibrosPrimeraPila = Library.MAX_BOOK_STACK * bookCatalogTime;
+
+
+        int t1 = (position.getNumStack() - 1) * (lotPreparationTime + (Library.MAX_BOOK_STACK * bookCatalogTime));
+
+        // Tiempo para catalogar el libro que buscamos dentro de su pila. Al número de posición dentro de la pila
+        // le sumo 1 porque, como antes, las posiciones empiezan en 0, si el libro está en la posición, tengo que catalogar
+        // los 9 libros anteriores más este libro, total 10
+        int t2 = lotPreparationTime + ((position.getNumStack() + 1) * bookCatalogTime);
+
+        int time = t1 + t2;
+
+
+
         return 0;
     }
 
@@ -837,8 +878,6 @@ public class LibraryPR2Impl implements Library {
             }
         }
         return null;
-
-        //return this.bookWareHouse.getBookById(bookId);
     }
 
 
@@ -870,8 +909,6 @@ public class LibraryPR2Impl implements Library {
         }
 
         return 0;
-
-        //return this.bookWareHouse.getConcurrentLoansByReader(readerId);
     }
 
 

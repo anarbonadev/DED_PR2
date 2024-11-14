@@ -13,28 +13,8 @@ public class BookWareHouse {
      * Aquí declaro todas las estructuras de datos que vamos a usar. Se indican en la PEC1, página 15
      */
 
-    // Lectores
-    //public static final Reader[] readers = new Reader[MAX_NUM_READERS];
-
-    // Trabajadores
-    //public static final Worker[] workers = new Worker[MAX_NUM_WORKERS];
-
     // Declaro la cola de pilas
     private final QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
-
-    // Libros catalogados en general, por todos los trabajadores
-    //public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
-
-    // Préstamos
-    //public final LinkedList<Loan> loans = new LinkedList<>();
-
-
-
-
-
-
-
-
 
 
     // Constructor
@@ -309,7 +289,10 @@ public class BookWareHouse {
      * @return Devuelve la posición que ocupa el libro
      */
     public Position getPosition(String bookId) {
-        Position position = new Position();
+
+        // Inicializa tanto numStack como numPosition a -1 para controlar cuando un libro no se encuentra en
+        // ninguna pila
+        Position position = new Position(-1,-1);
         boolean found = false;
 
         // Creamos un iterador para recorrer la cola
@@ -355,9 +338,16 @@ public class BookWareHouse {
         private int numPosition;
 
         // Constructor
+        /*
         public Position() {
             this.numStack = -1;
             this.numPosition = -1;
+        }
+        */
+
+        public Position(int numStack, int numPosition) {
+            this.numStack = numStack;
+            this.numPosition = numPosition;
         }
 
         /***
@@ -404,61 +394,6 @@ public class BookWareHouse {
     public boolean isQueueEmpty() {
         return queueLinkedList.isEmpty();
     }
-
-
-    /***
-     * Función que busca en la colección de libros catalogados un libro por su ID
-     * @param bookId Identificador del libro que estamos buscando
-     * @return Devuelve la información del libro si lo encuentra
-     */
-    /*
-    public CatalogedBook getBookById(String bookId) {
-        // Primero recuperamos el iterador de catalogedBooks
-        Iterator<CatalogedBook> iterator = catalogedBooks.values();
-
-        // Luego recorremos la lista de libros buscando por isbn
-        while(iterator.hasNext()) {
-            CatalogedBook catalogedBook = iterator.next();
-            if(catalogedBook.getBookId().equals(bookId)) {
-                return catalogedBook;
-            }
-        }
-        return null;
-    }
-    */
-
-
-    /***
-     * Función que recupera la cantidad de libros que tiene prestados de forma simultánea un lector. Se saca del
-     * atributo concurrentLoans del lector
-     * @param readerId Identificador del lector
-     * @return Devuelve la cantidad de préstamos simultáneos del lector
-     */
-    /*
-    public int getConcurrentLoansByReader(String readerId) {
-
-        // Recorremos el array buscado al lector
-        for(Reader reader : readers) {
-            if(reader != null && reader.getId().equals(readerId)) {
-
-                // Recuperamos el array dónde guardamos los préstamos simultáneos
-                Loan[] concurrentLoans = reader.getConcurrentLoans();
-
-                int totalConcurrentLoans = 0;
-
-                for(Loan loan : concurrentLoans) {
-                    if(loan != null) {
-                        totalConcurrentLoans++;
-                    }
-                }
-
-                return totalConcurrentLoans;
-            }
-        }
-
-        return 0;
-    }
-    */
 
 
     /***
