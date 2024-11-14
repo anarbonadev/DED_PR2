@@ -129,4 +129,13 @@ public class Worker {
         this.openLoans.insertEnd(loan);
     }
 
+
+    /***
+     * Función que añade un nuevo préstamo a la lista de préstamos abiertos por el trabajador
+     * @param loan Es el nuevo préstamo abierto
+     */
+    public void addLoanToClosedLoans(Loan loan) {
+        this.closedLoans.insertEnd(loan);
+    }
+
 }

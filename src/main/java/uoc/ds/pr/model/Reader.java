@@ -111,6 +111,14 @@ public class Reader {
         this.concurrentLoans = concurrentLoans;
     }
 
+    public int getNextIndex() {
+        return nextIndex;
+    }
+
+    public void setNextIndex(int nextIndex) {
+        this.nextIndex = nextIndex;
+    }
+
     /***
      * Función que inserta un nuevo préstamo en la lista de préstamos del lector
      * @param loan Es el nuevo préstamo del lector

@@ -240,59 +240,6 @@ public class BookWareHouse {
 
 
     /***
-     * Función que devuelve el número de préstamos que tiene un lector
-     * @param readerId Identificador del lector
-     * @return El número de copias que tiene un lector en préstamo
-     */
-    /*
-    public int numCurrentLoansByReader(String readerId) {
-
-        int numCurrentLoans = 0;
-
-        // Recorremos el array buscado al lector
-        for(Reader reader : readers) {
-            if(reader != null && reader.getId().equals(readerId)) {
-                Loan[] readerLoans = reader.getConcurrentLoans();
-                for(Loan loan : readerLoans) {
-                    if(loan != null)
-                    {
-                        numCurrentLoans++;
-                    }
-                }
-            }
-        }
-        return numCurrentLoans;
-    }
-    */
-
-
-    /***
-     * Función que devuelve la cantidad de préstamos que han sido cerrados por un trabajador
-     * @param workerId Identificador del trabajador
-     * @return
-     */
-    public int numClosedLoansByWorker(String workerId) {
-
-        // TODO: ver de dónde saco este dato
-
-        return 0;
-    }
-
-
-    /***
-     * Función que devuelve la cantidad de préstamos que han sido cerrados por un lector
-     * @param readerId
-     * @return
-     */
-    public int numClosedLoansByReader(String readerId) {
-
-        // TODO: ver de dónde saco este dato
-
-        return 0;
-    }
-
-
-    /***
      * Función que guarda un libro con los datos que nos llegan
      * @param bookId Identificador del libro
      * @param title Título
@@ -510,25 +457,6 @@ public class BookWareHouse {
         }
 
         return 0;
-    }
-    */
-
-
-    /***
-     * Función que se usa para incrementar el número de préstamos del lector
-     * @param loan Es el nuevo préstamo que se lleva el lector
-     */
-    /*
-    public void increaseLoanReaderCount(Loan loan) {
-
-        // Recorremos el array buscando al lector
-        for (int i = 0; i < readers.length; i++) {
-            if(readers[i] != null && readers[i].getId().equals(loan.getReaderId())) {
-                // Añadimos el préstamo al lector
-                readers[i].addNewLoan(loan);
-                return;
-            }
-        }
     }
     */
 

@@ -15,11 +15,12 @@ public class Loan {
     private String workerId;             // Identificador del trabajador que lo presta
     private LocalDate date;              // La fecha del préstamo
     private LocalDate expirationDate;    // La fecha final de devolución
-    private Library.LoanState state;               // Estado en el que puede estar un préstamo
+    private Library.LoanState state;     // Estado en el que puede estar un préstamo
 
 
     // Conctructor
-    public Loan(String loanId, String readerId, String bookId, String workerId, LocalDate date, LocalDate expirationDate, Library.LoanState state) {
+    public Loan(String loanId, String readerId, String bookId, String workerId, LocalDate date
+            , LocalDate expirationDate, Library.LoanState state) {
         this.loanId = loanId;
         this.readerId = readerId;
         this.bookId = bookId;

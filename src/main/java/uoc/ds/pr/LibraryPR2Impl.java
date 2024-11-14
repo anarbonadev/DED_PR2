@@ -225,6 +225,8 @@ public class LibraryPR2Impl implements Library {
         checkoutBook(loan);
 
         // El número de préstamos del lector será el mismo más una unidad
+        // Añadimos el préstamo tanto a la lista total de préstamos (loans) como a la lista de
+        // préstamos concurrentes (concurrentLoans)
         increaseLoanReaderCount(loan);
 
         // El número de préstamos realizados por un trabajador será el mismo más una unidad. Entiendo que se refiere
@@ -257,14 +259,16 @@ public class LibraryPR2Impl implements Library {
         if(loan.getExpirationDate().isAfter(date)) loan.setState(LoanState.COMPLETED);
         else loan.setState(LoanState.DELAYED);
 
+        // Actualizo la fecha final de devolución del libro a la fecha real
+        loan.setExpirationDate(date);
+
         // El número de préstamos cerrados de un lector será el mismo más una unidad
         markLoanAsReturnedByReader(loan);
 
-
         // El número de préstamos cerrados realizados por el trabajador que gestionó el préstamo será el mismo más una unidad
-        markLoanAsReturnedByWorker(loan);
+        increaseClosedLoanWorkerCount(loan);
 
-        return null;
+        return loan;
     }
 
 
@@ -575,8 +579,6 @@ public class LibraryPR2Impl implements Library {
             }
         }
         return numCurrentLoans;
-
-        //return this.bookWareHouse.numCurrentLoansByReader(readerId);
     }
 
 
@@ -587,7 +589,7 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numClosedLoansByWorker(String workerId) {
-        return this.bookWareHouse.numClosedLoansByWorker(workerId);
+        return getWorker(workerId).getClosedLoans().size();
     }
 
 
@@ -598,7 +600,24 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numClosedLoansByReader(String readerId) {
-        return this.bookWareHouse.numClosedLoansByReader(readerId);
+
+        int numberClosedLoans = 0;
+
+        // Recupero todos préstamos del lector
+        LinkedList<Loan> loans = getReader(readerId).getLoans();
+
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<Loan> iterator = loans.values();
+
+        // Luego recorremos la lista de libros buscando por isbn
+        while(iterator.hasNext()) {
+            Loan loan = iterator.next();
+            if(loan.getState().equals(LoanState.COMPLETED) || loan.getState().equals(LoanState.DELAYED)) {
+                numberClosedLoans++;
+            }
+        }
+
+        return numberClosedLoans;
     }
 
     /***********************************************************************************/
@@ -909,7 +928,8 @@ public class LibraryPR2Impl implements Library {
 
 
     /***
-     * Función que se usa para incrementar el número de préstamos del lector
+     * Función que se usa para añadir el préstamo a la lista total de préstamos del lector (loans) y a la lista
+     * de préstamos concurrentes (concurrentLoans)
      * @param loan Es el nuevo préstamo que se lleva el lector
      */
     private void increaseLoanReaderCount(Loan loan) {
@@ -917,13 +937,16 @@ public class LibraryPR2Impl implements Library {
         // Recorremos el array buscando al lector
         for (int i = 0; i < readers.length; i++) {
             if(readers[i] != null && readers[i].getId().equals(loan.getReaderId())) {
-                // Añadimos el préstamo al lector
+
+                // Añadimos el préstamo a la lista de préstamos simulténeos del lector
                 readers[i].addNewLoan(loan);
+
+                // Añadimos el préstamo a la lista de préstamos totales del lector
+                readers[i].getLoans().insertEnd(loan);
+
                 return;
             }
         }
-
-        //this.bookWareHouse.increaseLoanReaderCount(loan);
     }
 
 
@@ -938,6 +961,25 @@ public class LibraryPR2Impl implements Library {
             if(workers[i] != null && workers[i].getId().equals(loan.getWorkerId())) {
                 // Añadimos el préstamo al trabajador
                 workers[i].addLoanToOpenLoans(loan);
+                return;
+            }
+        }
+
+        //this.bookWareHouse.increaseOpenLoanWorkerCount(loan);
+    }
+
+
+    /***
+     * Función que se usa para incrementar el número de préstamos cerrados por un trabajador
+     * @param loan Es el nuevo préstamo abierto
+     */
+    private void increaseClosedLoanWorkerCount(Loan loan) {
+
+        // Recorremos el array buscando al trabajador
+        for (int i = 0; i < workers.length; i++) {
+            if(workers[i] != null && workers[i].getId().equals(loan.getWorkerId())) {
+                // Añadimos el préstamo al trabajador
+                workers[i].addLoanToClosedLoans(loan);
                 return;
             }
         }
@@ -986,28 +1028,27 @@ public class LibraryPR2Impl implements Library {
      */
     private void markLoanAsReturnedByReader(Loan loan) {
 
-        // Primero recupero el lector que tiene este préstamo
-        Reader reader = getReader(loan.getReaderId());
+        // Buscamos el lector que está devolviendo el préstamo
+        for (Reader reader : readers) {
 
-        // Actualizo la lista de préstamos del lector
-        LinkedList<Loan> readerLoans = updateReaderLoans(loan);
+            // Busco el lector que figura en el préstamo
+            if(reader.getId().equals(loan.getReaderId())) {
 
-        // Busco el préstamo en la lista de préstamos concurrentes del lector y lo elimino
-        Loan[] newConcurrentLoans = removeLoanFronLoanList(loan);
+                // Primero recupero los préstamos del lector
+                //LinkedList<Loan> loans = reader.getLoans();
 
+                // Actualizo la lista de préstamos del lector
+                updateReaderLoans(reader, loan);
 
-        // Actualizo la lista de préstamos del lector con esta nuevo lista
-        reader.setLoans(readerLoans);
+                // Actualizo los préstamos del lector
+                //reader.setLoans(readerLoans);
 
-        // Actualizo la lista de préstamos concurrentes del lector con la nueva lista
-        reader.setConcurrentLoans(newConcurrentLoans);
+                // Actualizo el array de préstamos concurrentes del lector
+                removeLoanFromLoanList(reader, loan);
 
-        // Actualizo al lector dentro del vector de lectores
-        // TODO: comprobar que esta función es capaz de actualizar la lista de préstamos y el array
-        updateReader(reader);
-
-
-
+                return;
+            }
+        }
     }
 
 
@@ -1015,88 +1056,69 @@ public class LibraryPR2Impl implements Library {
      * Función que buscar el préstamo en la lista de préstamos del lector para actualizar su estado
      * @param loan Es el préstamo que estamos procesando
      */
-    private LinkedList<Loan> updateReaderLoans(Loan loan) {
-
-
-
-
-
-
-
-
-
-
-
-
-
+    private void updateReaderLoans(Reader reader, Loan loan) {
 
         // Primero recuperamos las posiciones ocupadas
-        Traversal<CatalogedBook> iterator = catalogedBooks.positions();
-        Position<CatalogedBook> positionToUpdate = null;
+        Traversal<Loan> iterator = reader.getLoans().positions();
+        Position<Loan> positionToUpdate = null;
+
 
         // Luego buscamos qué posición ocupa el libro que tenga el bookId que recibimos
         while(iterator.hasNext()) {
-            Position<CatalogedBook> currentPosition = iterator.next();
-            CatalogedBook currentBook = currentPosition.getElem();
+            Position<Loan> currentPosition = iterator.next();
+            Loan currentLoan = currentPosition.getElem();
 
-            if(currentBook.getBookId().equals(loan.getBookId())) {
-
-                // Si no existen ejemplares suficientes del libro se indicará un error
-                if(currentBook.numCopies() == 0) throw new NoBookException(bundle.getString("exception.NoBookException"));
-
+            if(currentLoan.getLoanId().equals(loan.getLoanId())) {
                 positionToUpdate = currentPosition;
                 break;
             }
         }
 
-        // Si hemos encontrado la posición, actualizamos dicha posición con un nuevo CatalogedBook con
-        // igual al anterior pero con una copia menos disponible
+        // Si hemos encontrado la posición, actualizamos dicha posición con un nuevo Loan igual al anterior pero
+        // con una copia menos disponible
         if(positionToUpdate != null) {
 
-            CatalogedBook newBook = new CatalogedBook(
+            Loan newLoan = new Loan(
+                    positionToUpdate.getElem().getLoanId(),
+                    positionToUpdate.getElem().getReaderId(),
                     positionToUpdate.getElem().getBookId(),
-                    positionToUpdate.getElem().getTitle(),
-                    positionToUpdate.getElem().getPublisher(),
-                    positionToUpdate.getElem().getEdition(),
-                    positionToUpdate.getElem().getPublicationYear(),
-                    positionToUpdate.getElem().getIsbn(),
-                    positionToUpdate.getElem().getAuthor(),
-                    positionToUpdate.getElem().getTheme(),
-                    positionToUpdate.getElem().numCopies(),
-                    positionToUpdate.getElem().getAvailableCopies() - 1,
-                    positionToUpdate.getElem().getIdWorker(),
-                    positionToUpdate.getElem().getLoans()
+                    positionToUpdate.getElem().getWorkerId(),
+                    positionToUpdate.getElem().getDate(),
+                    loan.getExpirationDate(),
+                    loan.getState()
             );
 
-            // Añado el nuevo préstamo del libro
-            newBook.addnewLoanToLoans(loan);
-
-            CatalogedBook oldBook = catalogedBooks.update(positionToUpdate, newBook);
+            Loan oldLoan = reader.getLoans().update(positionToUpdate, newLoan);
         }
-
-
     }
 
 
     /***
      * Función que busca un préstamo en la lista de préstamos concurrentes de un lector y lo elimina
-     * @param loan Es el préstamo que estamos procesando
-     * @return La nueva lista de préstamos concurrentes del lector
+     * @param reader Es el lector que tiene el préstamo
+     * @param loan Es el préstamo a borrar
      */
-    private Loan[] removeLoanFronLoanList(Loan loan) {
+    private void removeLoanFromLoanList(Reader reader, Loan loan) {
 
+        int index = 0;
 
+        Loan[] concurrentLoans = reader.getConcurrentLoans();
 
+        // Busco la posición dónde está el préstamo
+        for(int i = 0; i < concurrentLoans.length - 1; i++) {
+            if(concurrentLoans[i].getLoanId().equals(loan.getLoanId())) {
+                index = i;
+            }
+        }
 
+        // Desplazo los elementos una posición a la izquierda desde 'index'
+        for(int i = index; i < concurrentLoans.length - 1; i++) {
+            concurrentLoans[i] = concurrentLoans[i + 1];
+        }
 
-    }
-
-
-    /***
-     * Función que actualiza la lista de préstamos de un trabajador
-     * @param loan Es el préstamo que estamos procesando
-     */
-    private void markLoanAsReturnedByWorker(Loan loan) {
+        // Asigno null a la última posición
+        concurrentLoans[concurrentLoans.length - 1] = null;
+        reader.setNextIndex(reader.getNextIndex() - 1);
     }
 
 
