@@ -126,7 +126,6 @@ public class OrderedVector<E> implements FiniteContainer<E> {
         }
     }
 
-
     @Override
     public boolean isFull() {
         return len == data.length;

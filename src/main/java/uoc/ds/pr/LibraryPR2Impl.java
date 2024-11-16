@@ -26,16 +26,16 @@ public class LibraryPR2Impl implements Library {
      */
 
     // Lectores
-    public final Reader[] readers = new Reader[MAX_NUM_READERS];
+    private final Reader[] readers = new Reader[MAX_NUM_READERS];
 
     // Trabajadores
-    public static final Worker[] workers = new Worker[MAX_NUM_WORKERS];
+    private final Worker[] workers = new Worker[MAX_NUM_WORKERS];
 
     // Libros catalogados en general, por todos los trabajadores
-    public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
+    private final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
 
     // Préstamos
-    public final LinkedList<Loan> loans = new LinkedList<>();
+    private final LinkedList<Loan> loans = new LinkedList<>();
 
 
     // BookWareHouse controla todo lo referente al sistema de recepción de libros, procesamiento, colas, pilas...
@@ -45,6 +45,7 @@ public class LibraryPR2Impl implements Library {
      * Constructor
      */
     public LibraryPR2Impl() {
+        // TODO: pensar si inyecto aquí la lista de trabajadores, lectores, etc..
         this.bookWareHouse = new BookWareHouse();
     }
 
@@ -400,6 +401,11 @@ public class LibraryPR2Impl implements Library {
 
     @Override
     public Reader getReaderTheMost() throws NoReaderException {
+
+        // Si no hay un lector se indica un error
+
+
+
         return null;
     }
 

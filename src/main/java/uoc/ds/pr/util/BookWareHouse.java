@@ -299,12 +299,6 @@ public class BookWareHouse {
 
         while (iterator.hasNext() && !found) {
 
-            // Incrementamos el número de STACK
-            position.incNumStack();
-
-            // Reseteamos el valor de numPosition
-            position.setNumPosition(0);
-
             // Sacamos la cola que ocupa esta posición del iterador
             StackArrayImpl<StoredBook> stackArray = iterator.next();
 
@@ -318,12 +312,18 @@ public class BookWareHouse {
 
                 if(bookId.equals(storedBook.getBookId())) {
                     found = true;
-                    break;
+                    return position;
                 }
 
-                // Decrementamos la posición del libro
+                // Incrementamos la posición del libro
                 position.incNumPosition();
             }
+
+            // Incrementamos el número de STACK
+            position.incNumStack();
+
+            // Reseteamos el valor de numPosition
+            position.setNumPosition(0);
         }
 
         if(!found) {
