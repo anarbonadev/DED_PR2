@@ -88,8 +88,6 @@ public class BookWareHouseTest {
         Assert.assertEquals(14, bookWareHouse.numStacks());
         Assert.assertEquals(131, bookWareHouse.numBooks());
 
-        // El libro con bookId = "JV2c" se ha insertado al procesar la matriz booksData1. El libro está en la cima
-        // de la pila 1
         BookWareHouse.Position position = bookWareHouse.getPosition("JV2c");
         Assert.assertEquals(0, position.getNumStack());
         Assert.assertEquals(0, position.getNum());

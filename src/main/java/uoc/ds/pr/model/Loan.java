@@ -1,5 +1,7 @@
 package uoc.ds.pr.model;
 
+import uoc.ds.pr.Library;
+
 import java.time.LocalDate;
 
 /*
@@ -7,17 +9,20 @@ import java.time.LocalDate;
 * */
 public class Loan {
     // Attributes
-    public String loanId;               // Identificador del préstamo
-    public String readerId;             // Identificador del lector
-    public String bookId;               // Identificador del libro
-    public String workerId;             // Identificador del trabajador que lo presta
-    public LocalDate date;              // La fecha del préstamo
-    public LocalDate expirationDate;    // La fecha final de devolución
-    public String state;               // Estado en el que puede estar un préstamo
+    private String loanId;              // Identificador del préstamo
+    private String readerId;            // Identificador del lector
+    private String bookId;              // Identificador del libro
+    private String workerId;            // Identificador del trabajador que lo presta
+    private LocalDate date;             // La fecha del préstamo
+    private LocalDate expirationDate;   // La fecha final de devolución
+    private Library.LoanState state;    // Estado en el que puede estar un préstamo
+    private String title;               // Título del libro prestado
+
 
 
     // Conctructor
-    public Loan(String loanId, String readerId, String bookId, String workerId, LocalDate date, LocalDate expirationDate, String state) {
+    public Loan(String loanId, String readerId, String bookId, String workerId, LocalDate date
+            , LocalDate expirationDate, Library.LoanState state, String title) {
         this.loanId = loanId;
         this.readerId = readerId;
         this.bookId = bookId;
@@ -25,6 +30,7 @@ public class Loan {
         this.date = date;
         this.expirationDate = expirationDate;
         this.state = state;
+        this.title = title;
     }
 
     // Getters & Setters
@@ -76,20 +82,19 @@ public class Loan {
         this.expirationDate = expirationDate;
     }
 
-    public String getState() {
+    public Library.LoanState getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(Library.LoanState state) {
         this.state = state;
     }
 
     /***
-     *
+     * Función que devuelve el título del libro prestado
      * @return
      */
     public String getTitle(){
-        //TODO: revisar este método, porque se usa en la clase LibraryPR2Test, pero no tiene sentido porque un préstamo sólo guarda el bookId
-        return "";
+        return this.title;
     }
 }

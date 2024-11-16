@@ -3,27 +3,29 @@ package uoc.ds.pr.model;
 import edu.uoc.ds.adt.sequential.LinkedList;
 
 import java.time.LocalDate;
-
-import static uoc.ds.pr.Library.MAXIMUM_NUMBER_OF_BOOKS;
+import java.util.Comparator;
 
 /*
 * Clase que representa a un lector
 * */
-public class Reader {
+public class Reader implements Comparable<Reader> {
 
     // Attributes
-    public String id;               // Identificador
-    public String name;             // Nombre
-    public String surname;          // Apellido
-    public String docId;            // DNI
-    public LocalDate birthDate;     // Fecha de cumpleaños
-    public String birthPlace;       // Lugar de nacimiento
-    public String address;          // Dirección
+    private String id;               // Identificador
+    private String name;             // Nombre
+    private String surname;          // Apellido
+    private String docId;            // DNI
+    private LocalDate birthDate;     // Fecha de cumpleaños
+    private String birthPlace;       // Lugar de nacimiento
+    private String address;          // Dirección
 
-    public LinkedList<Loan> loans;  // Lista de todos los préstamos que ha tenido el lector
+    private LinkedList<Loan> loans;  // Lista de todos los préstamos que ha tenido el lector
 
-    public Loan[] concurrentLoans;  // Vector que contiene los préstamos simultáneos que tiene un lector
+    private Loan[] concurrentLoans;  // Vector que contiene los préstamos simultáneos que tiene un lector
+    private int nextIndex;           // Me indica el siguiente índice libre del vector concurrentLoans
 
+    // Comparadores
+    public static final Comparator<Reader> CMP_LOANS = (r1, r2) -> Integer.compare(r1.loans.size(), r2.loans.size());
 
     // Constructor
     public Reader(String id, String name, String surname, String docId, LocalDate birthDate, String birthPlace
@@ -35,6 +37,7 @@ public class Reader {
         this.birthDate = birthDate;
         this.birthPlace = birthPlace;
         this.address = address;
+        this.nextIndex = 0; // Lo inicializo a 0, para que el primer préstamo vaya en esta posición
     }
 
     // Getters & Setters
@@ -108,5 +111,30 @@ public class Reader {
 
     public void setConcurrentLoans(Loan[] concurrentLoans) {
         this.concurrentLoans = concurrentLoans;
+    }
+
+    public int getNextIndex() {
+        return nextIndex;
+    }
+
+    public void setNextIndex(int nextIndex) {
+        this.nextIndex = nextIndex;
+    }
+
+    /***
+     * Función que inserta un nuevo préstamo en la lista de préstamos del lector
+     * @param loan Es el nuevo préstamo del lector
+     */
+    public void addNewLoan(Loan loan){
+        // Asignamos el préstamo en la posición que toque
+        this.concurrentLoans[nextIndex] = loan;
+
+        // Incrementamos el índice
+        nextIndex++;
+    }
+
+    @Override
+    public int compareTo(Reader o) {
+        return this.id.compareTo(o.id);
     }
 }

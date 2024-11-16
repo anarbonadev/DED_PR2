@@ -6,14 +6,14 @@ package uoc.ds.pr.model;
 public class Book {
 
     // Protected attributes
-    public String bookId;        // Identificador
-    public String title;         // Título
-    public String publisher;     // Editorial
-    public String edition;          // Número de edición
-    public int publicationYear;  // Año de publicación
-    public String isbn;          // ISBN
-    public String author;        // Autor
-    public String theme;         // Temática
+    private String bookId;        // Identificador
+    private String title;         // Título
+    private String publisher;     // Editorial
+    private String edition;          // Número de edición
+    private int publicationYear;  // Año de publicación
+    private String isbn;          // ISBN
+    private String author;        // Autor
+    private String theme;         // Temática
 
     // Constructor
     public Book(String bookId, String title, String publisher, String edition, int publicationYear, String isbn, String author, String theme) {

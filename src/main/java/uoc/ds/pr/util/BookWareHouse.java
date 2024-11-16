@@ -1,7 +1,7 @@
 package uoc.ds.pr.util;
 
-import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.StackArrayImpl;
+import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.model.*;
 
 import static uoc.ds.pr.Library.*;
@@ -12,44 +12,32 @@ public class BookWareHouse {
      * Aquí declaro todas las estructuras de datos que vamos a usar. Se indican en la PEC1, página 15
      */
 
-    // Lectores
-    public static final Reader[] readers = new Reader[MAX_NUM_READERS];
-
-    // Trabajadores
-    public static final Worker[] workers = new Worker[MAX_NUM_WORKERS];
-
     // Declaro la cola de pilas
-    private QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
-
-    // Libros catalogados
-    public static final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
-
-    // Préstamos
-    public static final LinkedList<Loan> books = new LinkedList<>();
-
-
-    // Préstamos de un lector
-
-
-
-
-
-
+    private final QueueLinkedList<StackArrayImpl<StoredBook>> queueLinkedList = new QueueLinkedList<>();
 
 
     // Constructor
     public BookWareHouse() {
     }
 
+
     /***
      * Función que cuenta la cantidad de libros total que hay en la cola, sumando los libros de todas las pilas
-     * @return Devuelve el número toal de libros
+     * @return Devuelve el número total de libros
      */
     public int numBooks() {
 
-        // TODO: tengo que ver dónde estarían guardados estos datos
+        int totalBooks = 0;
 
-        return 0;
+        // Creamos un iterador para recorrer la cola
+        Iterator<StackArrayImpl<StoredBook>> iterator = queueLinkedList.values();
+
+        while (iterator.hasNext()) {
+            StackArrayImpl<StoredBook> stackArray = iterator.next();
+            totalBooks += stackArray.size();
+        }
+
+        return totalBooks;
     }
 
     /***
@@ -58,139 +46,17 @@ public class BookWareHouse {
      */
     public int numStacks() {
 
-        // TODO: tengo que ver dónde estarían guardados estos datos
+        int totalStacks = 0;
 
-        return 0;
-    }
+        // Creamos un iterador para recorrer la cola
+        Iterator<StackArrayImpl<StoredBook>> iterator = queueLinkedList.values();
 
+        while (iterator.hasNext()) {
+            iterator.next();
+            totalStacks++;
+        }
 
-    /***
-     * Función que devuelve la cantidad total de libros catalogados
-     * @return Devuelve la cantidad total de libros catalogados
-     */
-    public int numCatalogBooks() {
-
-        // TODO: tengo que ver que debe devolver. Parece que tiene que devolver la cantidad total de libros catalogados
-
-        return 0;
-    }
-
-    /***
-     * Función que devuelve la cantidad de libros catalogados por un trabajador. Se consideran catalogados por un
-     * trabajador cuando es la primera vez que se cataloga un libro.
-     *      Si un segundo trabajador cataloga un libro que ya fue catalogado por otro trabajador, no cuenta
-     * @param workerId Identificador del trabajador
-     * @return Devuelve la cantidad total de libros catalogados por el trabajador
-     */
-    public int numCatalogBooksInWorker(String workerId) {
-
-        // TODO: tengo que ver de dónde saco el valor de libros catalogados por un trabajador
-
-        return 0;
-    }
-
-
-    /***
-     * Función que devuelve la cantidad TOTAL de libros procesados por un trabajador, le cuente o no como libro
-     * catalogado
-     * @param workerId Identificador del trabajador
-     * @return Devuelve la cantidad total de libros procesados por el trabajador
-     */
-    public int totalCatalogBooksByWorker(String workerId) {
-
-        // TODO: tengo que ver de dónde saco el total de libros procesados por un trabajador
-
-        return 0;
-    }
-
-
-    /***
-     * Función que devuelve la cantidad total de copias que hay en la biblioteca de un libro concreto
-     * @param bookId Identificador del libro del que queremos saber cuántas copias tenemos
-     * @return Devuelve la cantidad de copias que hay del libro
-     */
-    public int numCopies(String bookId) {
-
-        // TODO: sacar de la colección de libros catalogados la cantidad de copias
-
-        return 0;
-    }
-
-
-    /***
-     * Función que devuelve la cantidad de libros que se han prestado en total
-     * @return Devuelve la cantidad de libros prestados
-     */
-    public int numLoans() {
-
-        // TODO: PEC1 página 15 -> los libros prestados son una lista encadenada (Linked List)
-
-        return 0;
-    }
-
-
-    /***
-     * Función que devuelve el número de préstamos gestionados por un trabajador
-     * @param workerId Identificador del trabajador
-     * @return El número de préstamos que ha gestionado
-     */
-    public int numLoansByWorker(String workerId) {
-
-        // TODO: ver de dónde saco este dato
-
-        return 0;
-    }
-
-
-    /***
-     * Función que devuelve el número de copias prestadas de un libro
-     * @param bookId Identificador del libro
-     * @return El número de copias que hay prestadas
-     */
-    public int numLoansByBook(String bookId) {
-
-        // TODO: ver de dónde saco este dato
-
-        return 0;
-    }
-
-
-    /***
-     * Función que devuelve el número de préstamos que tiene un lector
-     * @param readerId Identificador del lector
-     * @return El número de copias que tiene un lector en préstamo
-     */
-    public int numCurrentLoansByReader(String readerId) {
-
-        // TODO: ver de dónde saco este dato
-
-        return 0;
-    }
-
-
-    /***
-     * Función que devuelve la cantidad de préstamos que han sido cerrados por un trabajador
-     * @param workerId Identificador del trabajador
-     * @return
-     */
-    public int numClosedLoansByWorker(String workerId) {
-
-        // TODO: ver de dónde saco este dato
-
-        return 0;
-    }
-
-
-    /***
-     * Función que devuelve la cantidad de préstamos que han sido cerrados por un lector
-     * @param readerId
-     * @return
-     */
-    public int numClosedLoansByReader(String readerId) {
-
-        // TODO: ver de dónde saco este dato
-
-        return 0;
+        return totalStacks;
     }
 
 
@@ -239,32 +105,23 @@ public class BookWareHouse {
      * @return Devuelve un libro pendiente de catalogar
      */
     public Book getBookPendingCataloging() {
-        Book book = null;
 
-        // Extraemos, sin eliminarla, la primera pila de la QUEUE
-        StackArrayImpl<StoredBook> firstStack = this.queueLinkedList.peek();
-
-        // Extraemos el primer libro de la STACK
-        StoredBook storedBook = firstStack.pop();
+        // Extraemos el libro que está en la cima de la primera STACK
+        StoredBook storedBook = queueLinkedList.peek().pop();
 
         // Si el tamaño de la primera pila es 0, la eliminamos
-        if(firstStack.size() == 0)
+        if(queueLinkedList.peek().size() == 0)
         {
-            //this.queueLinkedList.poll();
-
-            // TODO: comprobar que realmente elimina el primero elemento de la cola
-            this.queueLinkedList.deleteFirst();
+            queueLinkedList.deleteFirst();
         }
 
         // Mapeo el objeto StoredBook a un Book
         if(storedBook != null)
         {
-            // String bookId, String title, String publisher, String edition, int publicationYear, String isbn, String author, String theme
-            book = new Book(storedBook.getBookId(), storedBook.getTitle(), storedBook.getPublisher(), storedBook.getEdition()
-                    ,storedBook.getPublicationYear(), storedBook.getIsbn(), storedBook.getAuthor(), storedBook.getTheme());
+            return storedBook;
         }
 
-        return book;
+        return null;
     }
 
     /***
@@ -273,9 +130,48 @@ public class BookWareHouse {
      * @return Devuelve la posición que ocupa el libro
      */
     public Position getPosition(String bookId) {
-        Position position = null;
 
-        // TODO: desarrollar esta parte
+        // Inicializa tanto numStack como numPosition a -1 para controlar cuando un libro no se encuentra en
+        // ninguna pila
+        Position position = new Position();
+        boolean found = false;
+
+        // Creamos un iterador para recorrer la cola
+        Iterator<StackArrayImpl<StoredBook>> iterator = queueLinkedList.values();
+
+        while (iterator.hasNext() && !found) {
+
+            // Sacamos la cola que ocupa esta posición del iterador
+            StackArrayImpl<StoredBook> stackArray = iterator.next();
+
+            // Creamos un nuevo iterador, pero esta vez de la cola
+            Iterator<StoredBook> storedBookIterator = stackArray.values();
+
+            while (storedBookIterator.hasNext() && !found) {
+
+                // Sacamos el libro que ocupa esta posición del iterador
+                StoredBook storedBook = storedBookIterator.next();
+
+                if(bookId.equals(storedBook.getBookId())) {
+                    found = true;
+                    return position;
+                }
+
+                // Incrementamos la posición del libro
+                position.incNumPosition();
+            }
+
+            // Incrementamos el número de STACK
+            position.incNumStack();
+
+            // Reseteamos el valor de numPosition
+            position.setNumPosition(0);
+        }
+
+        if(!found) {
+            position.setNumStack(-1);
+            position.setNumPosition(-1);
+        }
 
         return position;
     }
@@ -286,6 +182,15 @@ public class BookWareHouse {
      */
     public class Position {
 
+        private int numStack;
+        private int numPosition;
+
+        // Constructor
+        public Position() {
+            this.numStack = 0;      // La pila en posición 0 es la pila 1, la siguiente es la 2, etc.
+            this.numPosition = 0;   // El libro en posición 0 es el libro 1, el siguiente el 2, etc., hasta el 10
+        }
+
 
         /***
          * Función que devuelve el número de pila dónde está el libro. La primera pila es la número 0, la siguiente
@@ -293,10 +198,16 @@ public class BookWareHouse {
          * @return Devuelve el número de la cola dónde se encuentra el libro
          */
         public int getNumStack() {
+            return numStack;
+        }
 
-            // TODO: desarrollar esta parte
+        // Setters
+        public void setNumStack(int numStack) {
+            this.numStack = numStack;
+        }
 
-            return 0;
+        public void setNumPosition(int numPosition) {
+            this.numPosition = numPosition;
         }
 
         /***
@@ -305,10 +216,21 @@ public class BookWareHouse {
          * @return Devuelve la posición del libro, dentro de la pila dónde está el libro.
          */
         public int getNum() {
+            return numPosition;
+        }
 
-            // TODO: desarrollar esta parte
+        /***
+         * Función que incrementa en +1 el valor de numStack
+         */
+        public void incNumStack() {
+            this.numStack++;
+        }
 
-            return 0;
+        /***
+         * Función que incrementa en +1 el valor de numPosition
+         */
+        public void incNumPosition() {
+            this.numPosition++;
         }
     }
 
@@ -336,45 +258,25 @@ public class BookWareHouse {
     private void addBookToQueue(StoredBook storedBook) {
         try {
 
-            // Comprobamos si la cola está vacía o no
-            if(this.queueLinkedList.isEmpty()) {
-                // Si está vacía, se añade una nueva pila con el libro
-                addNewStack(storedBook);
+            // Comprobamos si la cola está vacía o si la última cola está llena
+            if(queueLinkedList.isEmpty() || queueLinkedList.getLast().isFull()) {
+
+                // Instanciamos una nueva pila
+                StackArrayImpl<StoredBook> newStackArray = new StackArrayImpl<StoredBook>(MAX_BOOK_STACK);
+
+                // Añadimos el libro a la pila
+                newStackArray.push(storedBook);
+
+                // Insertamos la pila en la cola
+                queueLinkedList.add(newStackArray);
+
             } else {
-
-                // Tengo que recuperar el último montón de libros y ver cuántos libros tiene
-                StackArrayImpl<StoredBook> lastStack = this.queueLinkedList.getLastNode();
-
-                // Si tenemos una pila y no está llena
-                if(lastStack != null && !lastStack.isFull()) {
-                    lastStack.push(storedBook);
-                } else {
-                    // Hay que crear una nueva pila, añadir el libro, y la pila a la cola
-                    addNewStack(storedBook);
-                }
+                // Añadimos el libro a la última pila
+                queueLinkedList.getLast().push(storedBook);
             }
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
-
-    /***
-     * Función que crea una nueva pila, añade el libro que recibe por parámetros a dicha pila y luego añade la pila
-     * a la cola
-     * @param storedBook Es el libro que vamos a añadir
-     */
-    private void addNewStack(StoredBook storedBook) {
-        // Instanciamos una nueva pila
-        StackArrayImpl<StoredBook> newStackArray = new StackArrayImpl<StoredBook>(MAX_BOOK_STACK);
-
-        // Añadimos el libro a la pila
-        newStackArray.push(storedBook);
-
-        // Insertamos la pila en la cola
-        this.queueLinkedList.add(newStackArray);
-    }
-
-
 }
