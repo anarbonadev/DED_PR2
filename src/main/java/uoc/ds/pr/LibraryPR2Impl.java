@@ -413,6 +413,12 @@ public class LibraryPR2Impl implements Library {
         return null;
     }
 
+    /***
+     * Función que devuelve un iterador con todos los préstamos que se han hecho de un libro
+     * @param bookId Identificador del libro
+     * @return Devuelve un iterador con todos los préstamos en dicho libro
+     * @throws NoLoansException Excepción que salta si el lector nunca tomo prestado un libro
+     */
     @Override
     public Iterator<Loan> getAllLoansByBook(String bookId) throws NoLoansException {
 
@@ -436,6 +442,11 @@ public class LibraryPR2Impl implements Library {
         return loansBook.values();
     }
 
+    /***
+     * Función que recupera el lector que más lee, siendo dicho lector el que más préstamos totales tiene
+     * @return Devuelve el lector que más lee
+     * @throws NoReaderException Excepción que salta si no hay ningún lector
+     */
     @Override
     public Reader getReaderTheMost() throws NoReaderException {
 
@@ -448,17 +459,24 @@ public class LibraryPR2Impl implements Library {
 
     /***
      * Función que devuelve el libro más leído, basado en la cantidad de préstamos que tiene
-     * @return
-     * @throws NoBookException
+     * @return Devuelve el libro más leído
+     * @throws NoBookException Excepción que salta si no hay ningún libro
      */
     @Override
     public Book getMostReadBook() throws NoBookException {
 
+        Book book;
+
         // Si no hay un lector se indica un error
-        if(mostReadBook.isEmpty()) throw new NoBookException(bundle.getString("exception.NoBookException"));
+        if (mostReadBook.isEmpty()) throw new NoBookException(bundle.getString("exception.NoBookException"));
 
         // El lector que más lee estará en la posición 0
-        return mostReadBook.elementAt(0);
+        CatalogedBook cb = mostReadBook.elementAt(0);
+
+        book = new Book(cb.getBookId(), cb.getTitle(), cb.getPublisher(), cb.getEdition(), cb.getPublicationYear()
+                , cb.getIsbn(), cb.getAuthor(), cb.getTheme());
+
+        return book;
     }
 
 
