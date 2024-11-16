@@ -1,6 +1,5 @@
 package uoc.ds.pr.util;
 
-import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.adt.sequential.StackArrayImpl;
 import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.model.*;
@@ -292,7 +291,7 @@ public class BookWareHouse {
 
         // Inicializa tanto numStack como numPosition a -1 para controlar cuando un libro no se encuentra en
         // ninguna pila
-        Position position = new Position(-1,-1);
+        Position position = new Position();
         boolean found = false;
 
         // Creamos un iterador para recorrer la cola
@@ -304,7 +303,7 @@ public class BookWareHouse {
             position.incNumStack();
 
             // Reseteamos el valor de numPosition
-            position.setNumPosition(-1);
+            position.setNumPosition(0);
 
             // Sacamos la cola que ocupa esta posición del iterador
             StackArrayImpl<StoredBook> stackArray = iterator.next();
@@ -319,10 +318,17 @@ public class BookWareHouse {
 
                 if(bookId.equals(storedBook.getBookId())) {
                     found = true;
+                    break;
                 }
 
+                // Decrementamos la posición del libro
                 position.incNumPosition();
             }
+        }
+
+        if(!found) {
+            position.setNumStack(-1);
+            position.setNumPosition(-1);
         }
 
         return position;
@@ -338,17 +344,11 @@ public class BookWareHouse {
         private int numPosition;
 
         // Constructor
-        /*
         public Position() {
-            this.numStack = -1;
-            this.numPosition = -1;
+            this.numStack = 0;      // La pila en posición 0 es la pila 1, la siguiente es la 2, etc.
+            this.numPosition = 0;   // El libro en posición 0 es el libro 1, el siguiente el 2, etc., hasta el 10
         }
-        */
 
-        public Position(int numStack, int numPosition) {
-            this.numStack = numStack;
-            this.numPosition = numPosition;
-        }
 
         /***
          * Función que devuelve el número de pila dónde está el libro. La primera pila es la número 0, la siguiente
@@ -357,6 +357,15 @@ public class BookWareHouse {
          */
         public int getNumStack() {
             return numStack;
+        }
+
+        // Setters
+        public void setNumStack(int numStack) {
+            this.numStack = numStack;
+        }
+
+        public void setNumPosition(int numPosition) {
+            this.numPosition = numPosition;
         }
 
         /***
@@ -380,10 +389,6 @@ public class BookWareHouse {
          */
         public void incNumPosition() {
             this.numPosition++;
-        }
-
-        public void setNumPosition(int numPosition) {
-            this.numPosition = numPosition;
         }
     }
 
