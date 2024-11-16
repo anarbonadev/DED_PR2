@@ -219,8 +219,11 @@ public class LibraryPR2Impl implements Library {
         // Si el lector ya tiene tres libros en préstamo se indicará un error
         if(getConcurrentLoansByReader(readerId) == 3) throw new MaximumNumberOfBooksException(bundle.getString("exception.MaximumNumberOfBooksException"));
 
+        // Recuperamos el título del libro que se está prestando
+        String title = getTitleBookById(bookId);
+
         // Instanciamos el objeto de tipo Loan. El préstamo se marca como “En trámite”
-        Loan loan = new Loan(loanId, readerId, bookId, workerId, date, expirationDate, LoanState.INPROGRESS);
+        Loan loan = new Loan(loanId, readerId, bookId, workerId, date, expirationDate, LoanState.INPROGRESS, title);
 
         // El número de ejemplares del libro disponibles desciende en una unidad y se añade a la lista de préstamos
         // un nuevo préstamo
@@ -239,6 +242,7 @@ public class LibraryPR2Impl implements Library {
         incrementTotalLoans(loan);
 
     }
+
 
     /***
      * Función que se usa para que un lector devuelve un libro que tenía en préstamo
@@ -322,6 +326,21 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public Iterator<Loan> getAllLoansByReader(String readerId) throws NoLoansException {
+
+        // Recorremos el array buscado al lector
+        for(Reader reader : readers) {
+            if(reader != null && reader.getId().equals(readerId)) {
+
+                Iterator<Loan> iterator = reader.getLoans().values();
+
+                if(!iterator.hasNext())
+                    throw new NoLoansException(bundle.getString("exception.NoLoansException"));
+
+                return iterator;
+
+            }
+        }
+
         return null;
     }
 
@@ -975,7 +994,8 @@ public class LibraryPR2Impl implements Library {
                 readers[i].addNewLoan(loan);
 
                 // Añadimos el préstamo a la lista de préstamos totales del lector
-                readers[i].getLoans().insertEnd(loan);
+                //readers[i].getLoans().insertEnd(loan);
+                readers[i].getLoans().insertBeginning(loan);
 
                 return;
             }
@@ -1118,7 +1138,8 @@ public class LibraryPR2Impl implements Library {
                     positionToUpdate.getElem().getWorkerId(),
                     positionToUpdate.getElem().getDate(),
                     loan.getExpirationDate(),
-                    loan.getState()
+                    loan.getState(),
+                    positionToUpdate.getElem().getTitle()
             );
 
             Loan oldLoan = reader.getLoans().update(positionToUpdate, newLoan);
@@ -1152,6 +1173,26 @@ public class LibraryPR2Impl implements Library {
         // Asigno null a la última posición
         concurrentLoans[concurrentLoans.length - 1] = null;
         reader.setNextIndex(reader.getNextIndex() - 1);
+    }
+
+
+    /***
+     * Funcion que recuperar el título de un libro catalogado, por su ID
+     * @param bookId ID del libro
+     */
+    private String getTitleBookById(String bookId) {
+
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
+
+        // Luego recorremos la lista de libros buscando por bookId
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+            if(catalogedBook.getBookId().equals(bookId)) {
+                return catalogedBook.getTitle();
+            }
+        }
+        return "";
     }
 
 

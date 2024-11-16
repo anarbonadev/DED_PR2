@@ -278,11 +278,7 @@ public class LibraryPR2Test {
         Assert.assertThrows(BookNotFoundException.class, () ->
                 theLibrary.timeToBeCataloged("XXXX",  12, 3));
 
-        // Comento esta función temporalmente
         catalogBookTest();
-
-        // Añado esta función temporalmente
-        //storeBookTest();
 
         Assert.assertThrows(InvalidLotPreparationTimeException.class, () ->
                 theLibrary.timeToBeCataloged("JV8",  -1, 3));
@@ -299,7 +295,9 @@ public class LibraryPR2Test {
          * Assert.assertEquals(9, position.getNum());
          */
         int t = theLibrary.timeToBeCataloged("HP4a",  8, 12);
+
         Assert.assertEquals(244, t);
+
     }
 
 

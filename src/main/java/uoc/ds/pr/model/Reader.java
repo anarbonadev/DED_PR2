@@ -124,9 +124,6 @@ public class Reader {
      * @param loan Es el nuevo préstamo del lector
      */
     public void addNewLoan(Loan loan){
-
-        // TODO: aquí podríamos añadir una validación para comprobar que no tenga ya el máximo de préstamos permitidos
-
         // Asignamos el préstamo en la posición que toque
         this.concurrentLoans[nextIndex] = loan;
 

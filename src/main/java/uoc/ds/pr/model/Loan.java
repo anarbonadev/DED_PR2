@@ -9,18 +9,20 @@ import java.time.LocalDate;
 * */
 public class Loan {
     // Attributes
-    private String loanId;               // Identificador del préstamo
-    private String readerId;             // Identificador del lector
-    private String bookId;               // Identificador del libro
-    private String workerId;             // Identificador del trabajador que lo presta
-    private LocalDate date;              // La fecha del préstamo
-    private LocalDate expirationDate;    // La fecha final de devolución
-    private Library.LoanState state;     // Estado en el que puede estar un préstamo
+    private String loanId;              // Identificador del préstamo
+    private String readerId;            // Identificador del lector
+    private String bookId;              // Identificador del libro
+    private String workerId;            // Identificador del trabajador que lo presta
+    private LocalDate date;             // La fecha del préstamo
+    private LocalDate expirationDate;   // La fecha final de devolución
+    private Library.LoanState state;    // Estado en el que puede estar un préstamo
+    private String title;               // Título del libro prestado
+
 
 
     // Conctructor
     public Loan(String loanId, String readerId, String bookId, String workerId, LocalDate date
-            , LocalDate expirationDate, Library.LoanState state) {
+            , LocalDate expirationDate, Library.LoanState state, String title) {
         this.loanId = loanId;
         this.readerId = readerId;
         this.bookId = bookId;
@@ -28,6 +30,7 @@ public class Loan {
         this.date = date;
         this.expirationDate = expirationDate;
         this.state = state;
+        this.title = title;
     }
 
     // Getters & Setters
@@ -88,11 +91,10 @@ public class Loan {
     }
 
     /***
-     *
+     * Función que devuelve el título del libro prestado
      * @return
      */
     public String getTitle(){
-        //TODO: revisar este método, porque se usa en la clase LibraryPR2Test, pero no tiene sentido porque un préstamo sólo guarda el bookId
-        return "";
+        return this.title;
     }
 }
