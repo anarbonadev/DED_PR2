@@ -304,7 +304,11 @@ public class LibraryPR2Impl implements Library {
         // al ejecutar la función catalogBookTest() se han catalogado los 10 libros de la primera pila
 
         // Tiempo para catalogar las pilas anteriores a la pila en la que se encuentra el libro
-        int t1 = (position.getNumStack() - 1) * (lotPreparationTime + (Library.MAX_BOOK_STACK * bookCatalogTime));
+        //int t1 = (position.getNumStack() - 1) * (lotPreparationTime + (Library.MAX_BOOK_STACK * bookCatalogTime));
+
+        //TODO: quito el -1 porque sino cuando el libro que estamos calculando esté en la segunda pila, la primera pila
+        // da tiempo 0, porque sería 1 - 1 = 0
+        int t1 = (position.getNumStack()) * (lotPreparationTime + (Library.MAX_BOOK_STACK * bookCatalogTime));
 
         // Tiempo para catalogar el libro que buscamos dentro de su pila. Al número de posición dentro de la pila
         // le sumo 1 porque, como antes, las posiciones empiezan en 0, si el libro está en la posición 9, tengo que catalogar
