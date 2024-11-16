@@ -377,7 +377,25 @@ public class LibraryPR2Impl implements Library {
 
     @Override
     public Iterator<Loan> getAllLoansByBook(String bookId) throws NoLoansException {
-        return null;
+
+        // Creo una nueva lista de préstamos
+        LinkedList<Loan> loansBook = new LinkedList<>();
+
+        // Primero recuperamos el iterador de loans
+        Iterator<Loan> iterator = loans.values();
+
+        if(!iterator.hasNext())
+            throw new NoLoansException(bundle.getString("exception.NoLoansException"));
+
+        // Luego recorremos la lista de préstamos buscando por loadId
+        while(iterator.hasNext()) {
+            Loan loan = iterator.next();
+            if(loan.getBookId().equals(bookId)) {
+                loansBook.insertBeginning(loan);
+            }
+        }
+
+        return loansBook.values();
     }
 
     @Override
@@ -1086,10 +1104,10 @@ public class LibraryPR2Impl implements Library {
      */
     private Loan getLoanById(String loanId) {
 
-        // Primero recuperamos el iterador de catalogedBooks
+        // Primero recuperamos el iterador de loans
         Iterator<Loan> iterator = loans.values();
 
-        // Luego recorremos la lista de libros buscando por isbn
+        // Luego recorremos la lista de préstamos buscando por loadId
         while(iterator.hasNext()) {
             Loan loan = iterator.next();
 
