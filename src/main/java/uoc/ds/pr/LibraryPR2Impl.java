@@ -346,6 +346,32 @@ public class LibraryPR2Impl implements Library {
 
     @Override
     public Iterator<Loan> getAllLoansByState(String readerId, LoanState state) throws NoLoansException {
+
+        // Recorremos el array buscado al lector
+        for(Reader reader : readers) {
+            if(reader != null && reader.getId().equals(readerId)) {
+
+                Iterator<Loan> iterator = reader.getLoans().values();
+
+                if(!iterator.hasNext())
+                    throw new NoLoansException(bundle.getString("exception.NoLoansException"));
+
+                // Creo una nueva lista de préstamos
+                LinkedList<Loan> loans = new LinkedList<>();
+
+                // Recorro los préstamos del lector, filtrando por el estado indicado
+                while(iterator.hasNext()) {
+                    Loan loan = iterator.next();
+                    if(loan.getState().equals(state)) {
+                        loans.insertBeginning(loan);
+                    }
+                }
+
+                // Devolvemos un iterador de la colección de préstamos con el estado indicado
+                return loans.values();
+            }
+        }
+
         return null;
     }
 
