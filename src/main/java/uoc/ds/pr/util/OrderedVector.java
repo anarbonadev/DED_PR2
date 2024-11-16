@@ -56,18 +56,16 @@ public class OrderedVector<E> implements FiniteContainer<E> {
 
     }
 
+    public E elementAt(int i) {
+        return this.data[i];
+    }
 
-    /***
-     *
-     * @return
-     */
     public E last() {
         return data[len-1];
     }
 
-
     /***
-     * Función que usamos para elimiar un elemento concreto del OrderedVector
+     * Función que usamos para eliminar un elemento concreto del OrderedVector
      * @param elem Es el elemento que vamos a borrar
      */
     public void delete (E elem) {
@@ -99,10 +97,6 @@ public class OrderedVector<E> implements FiniteContainer<E> {
     }
 
 
-    /***
-     *
-     * @param i
-     */
     public void rshift(int i) {
         // shift all elements one position (RIGHT)
         int p = len-1;
@@ -112,11 +106,6 @@ public class OrderedVector<E> implements FiniteContainer<E> {
         }
     }
 
-
-    /***
-     *
-     * @param i
-     */
     public void lshift(int i) {
         // shift all elements one position (LEFT)
         int p = i;

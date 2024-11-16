@@ -11,6 +11,7 @@ import edu.uoc.ds.traversal.Traversal;
 import uoc.ds.pr.exceptions.*;
 import uoc.ds.pr.model.*;
 import uoc.ds.pr.util.BookWareHouse;
+import uoc.ds.pr.util.OrderedVector;
 import uoc.ds.pr.util.QueueLinkedList;
 
 
@@ -26,16 +27,23 @@ public class LibraryPR2Impl implements Library {
      */
 
     // Lectores
-    private final Reader[] readers = new Reader[MAX_NUM_READERS];
+    private Reader[] readers;
 
     // Trabajadores
-    private final Worker[] workers = new Worker[MAX_NUM_WORKERS];
+    private Worker[] workers;
 
     // Libros catalogados en general, por todos los trabajadores
-    private final LinkedList<CatalogedBook> catalogedBooks = new LinkedList<>();
+    private LinkedList<CatalogedBook> catalogedBooks;
 
     // Préstamos
-    private final LinkedList<Loan> loans = new LinkedList<>();
+    private LinkedList<Loan> loans;
+
+    // Lector que más lee
+    private OrderedVector<Reader> readerTheMost;
+
+    // Libro más leído
+    private OrderedVector<CatalogedBook> orderedBooks;
+
 
 
     // BookWareHouse controla todo lo referente al sistema de recepción de libros, procesamiento, colas, pilas...
@@ -45,10 +53,14 @@ public class LibraryPR2Impl implements Library {
      * Constructor
      */
     public LibraryPR2Impl() {
-        // TODO: pensar si inyecto aquí la lista de trabajadores, lectores, etc..
+        this.readers = new Reader[MAX_NUM_READERS];
+        this.workers = new Worker[MAX_NUM_WORKERS];
+        this.catalogedBooks = new LinkedList<>();
+        this.loans = new LinkedList<>();
+        this.readerTheMost = new OrderedVector<>(MAX_NUM_READERS, Reader.CMP_LOANS);
+        // TODO: indicar el comparador de libros
         this.bookWareHouse = new BookWareHouse();
     }
-
 
     /***
      * Función que usamos para registrar un nuevo lector
@@ -407,10 +419,10 @@ public class LibraryPR2Impl implements Library {
     public Reader getReaderTheMost() throws NoReaderException {
 
         // Si no hay un lector se indica un error
+        if(readerTheMost.isEmpty()) throw new NoReaderException(bundle.getString("exception.NoReaderException"));
 
-
-
-        return null;
+        // El lector que más lee estará en la posición 0
+        return readerTheMost.elementAt(0);
     }
 
     @Override
@@ -1051,6 +1063,9 @@ public class LibraryPR2Impl implements Library {
                 //readers[i].getLoans().insertEnd(loan);
                 readers[i].getLoans().insertBeginning(loan);
 
+                // Actualizamos la lista ordenada de los lectores
+                updateReaderTheMost(readers[i]);
+
                 return;
             }
         }
@@ -1247,6 +1262,15 @@ public class LibraryPR2Impl implements Library {
             }
         }
         return "";
+    }
+
+    /***
+     * Función que actualiza la lista ordenada de los lectores
+     * @param reader Es el lector que ha cambiado
+     */
+    private void updateReaderTheMost(Reader reader) {
+        readerTheMost.delete(reader);
+        readerTheMost.update(reader);
     }
 
 

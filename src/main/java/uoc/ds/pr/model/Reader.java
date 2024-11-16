@@ -3,13 +3,14 @@ package uoc.ds.pr.model;
 import edu.uoc.ds.adt.sequential.LinkedList;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 
 import static uoc.ds.pr.Library.MAXIMUM_NUMBER_OF_BOOKS;
 
 /*
 * Clase que representa a un lector
 * */
-public class Reader {
+public class Reader implements Comparable<Reader> {
 
     // Attributes
     private String id;               // Identificador
@@ -24,6 +25,9 @@ public class Reader {
 
     private Loan[] concurrentLoans;  // Vector que contiene los préstamos simultáneos que tiene un lector
     private int nextIndex;           // Me indica el siguiente índice libre del vector concurrentLoans
+
+    // Comparadores
+    public static final Comparator<Reader> CMP_LOANS = (r1, r2) -> r1.getName().compareTo(r2.getName());
 
     // Constructor
     public Reader(String id, String name, String surname, String docId, LocalDate birthDate, String birthPlace
@@ -129,5 +133,10 @@ public class Reader {
 
         // Incrementamos el índice
         nextIndex++;
+    }
+
+    @Override
+    public int compareTo(Reader o) {
+        return this.id.compareTo(o.id);
     }
 }
