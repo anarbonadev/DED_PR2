@@ -1,18 +1,16 @@
 package uoc.ds.pr;
 
-import java.time.LocalDate;
-import java.util.ResourceBundle;
-
 import edu.uoc.ds.adt.helpers.Position;
 import edu.uoc.ds.adt.sequential.LinkedList;
-import edu.uoc.ds.adt.sequential.StackArrayImpl;
 import edu.uoc.ds.traversal.Iterator;
 import edu.uoc.ds.traversal.Traversal;
 import uoc.ds.pr.exceptions.*;
 import uoc.ds.pr.model.*;
 import uoc.ds.pr.util.BookWareHouse;
 import uoc.ds.pr.util.OrderedVector;
-import uoc.ds.pr.util.QueueLinkedList;
+
+import java.time.LocalDate;
+import java.util.ResourceBundle;
 
 
 public class LibraryPR2Impl implements Library {
@@ -27,27 +25,27 @@ public class LibraryPR2Impl implements Library {
      */
 
     // Lectores
-    private Reader[] readers;
+    private final Reader[] readers;
 
     // Trabajadores
-    private Worker[] workers;
+    private final Worker[] workers;
 
     // Libros catalogados en general, por todos los trabajadores
-    private LinkedList<CatalogedBook> catalogedBooks;
+    private final LinkedList<CatalogedBook> catalogedBooks;
 
     // Préstamos
-    private LinkedList<Loan> loans;
+    private final LinkedList<Loan> loans;
 
     // Lector que más lee
-    private OrderedVector<Reader> readerTheMost;
+    private final OrderedVector<Reader> readerTheMost;
 
     // Libro más leído
-    private OrderedVector<CatalogedBook> mostReadBook;
+    private final OrderedVector<CatalogedBook> mostReadBook;
 
 
 
     // BookWareHouse controla todo lo referente al sistema de recepción de libros, procesamiento, colas, pilas...
-    private BookWareHouse bookWareHouse;
+    private final BookWareHouse bookWareHouse;
 
     /***
      * Constructor
@@ -600,8 +598,6 @@ public class LibraryPR2Impl implements Library {
             totalCatalogBooks = totalCatalogBooks + catalogedBook.numCopies();
         }
         return totalCatalogBooks;
-
-        //return this.bookWareHouse.numCatalogBooks();
     }
 
     /***
@@ -623,8 +619,6 @@ public class LibraryPR2Impl implements Library {
 
         }
         return 0;
-
-        //return this.bookWareHouse.numCatalogBooksInWorker(workerId);
     }
 
     /***
@@ -644,8 +638,6 @@ public class LibraryPR2Impl implements Library {
         }
 
         return 0;
-
-        //return this.bookWareHouse.totalCatalogBooksByWorker(workerId);
     }
 
     /***
@@ -667,8 +659,6 @@ public class LibraryPR2Impl implements Library {
             }
         }
         return 0;
-
-        //return this.bookWareHouse.numCopies(bookId);
     }
 
 
@@ -678,10 +668,7 @@ public class LibraryPR2Impl implements Library {
      */
     @Override
     public int numLoans() {
-
         return loans.size();
-
-        //return this.bookWareHouse.numLoans();
     }
 
 
@@ -699,8 +686,6 @@ public class LibraryPR2Impl implements Library {
             }
         }
         return 0;
-
-        //return this.bookWareHouse.numLoansByWorker(workerId);
     }
 
 
@@ -723,8 +708,6 @@ public class LibraryPR2Impl implements Library {
             }
         }
         return 0;
-
-        //return this.bookWareHouse.numLoansByBook(bookId);
     }
 
 
@@ -985,8 +968,6 @@ public class LibraryPR2Impl implements Library {
                 return;
             }
         }
-
-        //this.bookWareHouse.addBookToProcessedByWorker(workerId, bookToCatalog);
     }
 
 
@@ -1239,8 +1220,6 @@ public class LibraryPR2Impl implements Library {
                 return;
             }
         }
-
-        //this.bookWareHouse.increaseOpenLoanWorkerCount(loan);
     }
 
 

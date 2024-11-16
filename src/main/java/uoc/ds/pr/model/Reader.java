@@ -5,8 +5,6 @@ import edu.uoc.ds.adt.sequential.LinkedList;
 import java.time.LocalDate;
 import java.util.Comparator;
 
-import static uoc.ds.pr.Library.MAXIMUM_NUMBER_OF_BOOKS;
-
 /*
 * Clase que representa a un lector
 * */
