@@ -2,11 +2,13 @@ package uoc.ds.pr.model;
 
 import edu.uoc.ds.adt.sequential.LinkedList;
 
+import java.util.Comparator;
+
 /*
 * Clase que representa a un libro catalogado.
 * Hereda de la clase Book y añade los atributos específicos para gestionar el préstamo.
 * */
-public class CatalogedBook extends Book {
+public class CatalogedBook extends Book implements Comparable<CatalogedBook> {
 
     // Protected attributes
     private int totalCopies;      // Cantidad de ejemplares totales
@@ -17,6 +19,9 @@ public class CatalogedBook extends Book {
     private String  idWorker;
 
     public LinkedList<Loan> loans;  // Lista de todos los préstamos de un libro
+
+    // Comparadores
+    public static final Comparator<CatalogedBook> CMP_BOOK_LOANS = (r1, r2) -> Integer.compare(r1.loans.size(), r2.loans.size());
 
     // Constructor
     public CatalogedBook(String bookId, String title, String publisher, String edition, int publicationYear
@@ -86,5 +91,10 @@ public class CatalogedBook extends Book {
      */
     public void addnewLoanToLoans(Loan loan) {
         this.loans.insertEnd(loan);
+    }
+
+    @Override
+    public int compareTo(CatalogedBook o) {
+        return super.getBookId().compareTo(o.getBookId());
     }
 }

@@ -42,7 +42,7 @@ public class LibraryPR2Impl implements Library {
     private OrderedVector<Reader> readerTheMost;
 
     // Libro más leído
-    private OrderedVector<CatalogedBook> orderedBooks;
+    private OrderedVector<CatalogedBook> mostReadBook;
 
 
 
@@ -58,7 +58,7 @@ public class LibraryPR2Impl implements Library {
         this.catalogedBooks = new LinkedList<>();
         this.loans = new LinkedList<>();
         this.readerTheMost = new OrderedVector<>(MAX_NUM_READERS, Reader.CMP_LOANS);
-        // TODO: indicar el comparador de libros
+        this.mostReadBook = new OrderedVector<>(100, CatalogedBook.CMP_BOOK_LOANS);
         this.bookWareHouse = new BookWareHouse();
     }
 
@@ -253,7 +253,6 @@ public class LibraryPR2Impl implements Library {
 
         // El número de préstamos global será el mismo más una unidad
         incrementTotalLoans(loan);
-
     }
 
 
@@ -281,6 +280,9 @@ public class LibraryPR2Impl implements Library {
         // Actualizo la fecha final de devolución del libro a la fecha real
         loan.setExpirationDate(date);
 
+        // El número de ejemplares del libro disponibles aumente en una unidad y se actualiza su lista de préstamos
+        checkinBook(loan);
+
         // El número de préstamos cerrados de un lector será el mismo más una unidad
         markLoanAsReturnedByReader(loan);
 
@@ -290,7 +292,18 @@ public class LibraryPR2Impl implements Library {
         return loan;
     }
 
-
+    /***
+     * Función que devuelve el tiempo total que tardará un libro en ser catalogado y está disponible para su préstamo
+     * @param bookId Identificador del libro
+     * @param lotPreparationTime Tiempo medio de preparación de un montón
+     * @param bookCatalogTime Tiempo medio de preparación de un libro
+     * @return Devuelve el tiempo en minutos que tardará en estar disponible un libro
+     * @throws BookNotFoundException Excepción que salta si no exíste el libro
+     * @throws InvalidLotPreparationTimeException Excepción que salta si el tiempo medio de preparación de un montón
+     * no es numérico o es inferior a 0
+     * @throws InvalidCatalogTimeException Excepción que salta si el tiempo medio de preparación de un libro
+     * no es numérico o es inferior a 0
+     */
     @Override
     public int timeToBeCataloged(String bookId, int lotPreparationTime, int bookCatalogTime) throws BookNotFoundException, InvalidLotPreparationTimeException, InvalidCatalogTimeException {
 
@@ -336,10 +349,10 @@ public class LibraryPR2Impl implements Library {
     }
 
     /***
-     *
-     * @param readerId
-     * @return
-     * @throws NoLoansException
+     * Función que devuelve un iterador con todos los libros que tiene o ha tenido un lector en préstamo
+     * @param readerId Identificador del lector
+     * @return Devuelve un iterador con todos los préstamos
+     * @throws NoLoansException Excepción que salta si el lector nunca tomo prestado un libro
      */
     @Override
     public Iterator<Loan> getAllLoansByReader(String readerId) throws NoLoansException {
@@ -361,6 +374,14 @@ public class LibraryPR2Impl implements Library {
         return null;
     }
 
+    /***
+     * Función que devuelve un iterador con todos los libros que tiene o ha tenido un lector en préstamo en un estado
+     * concreto
+     * @param readerId Identificador del lector
+     * @param state Estado del préstamo
+     * @return Devuelve un iterador con todos los préstamos en dicho estado
+     * @throws NoLoansException Excepción que salta si el lector nunca tomo prestado un libro
+     */
     @Override
     public Iterator<Loan> getAllLoansByState(String readerId, LoanState state) throws NoLoansException {
 
@@ -425,9 +446,19 @@ public class LibraryPR2Impl implements Library {
         return readerTheMost.elementAt(0);
     }
 
+    /***
+     * Función que devuelve el libro más leído, basado en la cantidad de préstamos que tiene
+     * @return
+     * @throws NoBookException
+     */
     @Override
     public Book getMostReadBook() throws NoBookException {
-        return null;
+
+        // Si no hay un lector se indica un error
+        if(mostReadBook.isEmpty()) throw new NoBookException(bundle.getString("exception.NoBookException"));
+
+        // El lector que más lee estará en la posición 0
+        return mostReadBook.elementAt(0);
     }
 
 
@@ -1041,6 +1072,91 @@ public class LibraryPR2Impl implements Library {
             newBook.addnewLoanToLoans(loan);
 
             CatalogedBook oldBook = catalogedBooks.update(positionToUpdate, newBook);
+
+            // Actualizamos la lista ordenada de los libros
+            updateMostReadBook(newBook);
+        }
+    }
+
+
+    /***
+     * Función que se usa para incrementar en 1 unidad la cantidad de libros disponibles para un libro concreto
+     * y modificar ese préstamo en la lista de préstamos del libro
+     * @param loan Es el nuevo préstamo que se lleva el lector
+     */
+    private void checkinBook(Loan loan) {
+        // Primero recuperamos las posiciones ocupadas
+        Traversal<CatalogedBook> iterator = catalogedBooks.positions();
+        Position<CatalogedBook> positionToUpdate = null;
+
+        // Luego buscamos qué posición ocupa el libro que tenga el bookId que recibimos
+        while(iterator.hasNext()) {
+            Position<CatalogedBook> currentPosition = iterator.next();
+            CatalogedBook currentBook = currentPosition.getElem();
+
+            if(currentBook.getBookId().equals(loan.getBookId())) {
+                positionToUpdate = currentPosition;
+                break;
+            }
+        }
+
+        // Si hemos encontrado la posición, actualizamos dicha posición con un nuevo CatalogedBook con
+        // igual al anterior pero con una copia menos disponible
+        if(positionToUpdate != null) {
+
+            CatalogedBook newBook = new CatalogedBook(
+                    positionToUpdate.getElem().getBookId(),
+                    positionToUpdate.getElem().getTitle(),
+                    positionToUpdate.getElem().getPublisher(),
+                    positionToUpdate.getElem().getEdition(),
+                    positionToUpdate.getElem().getPublicationYear(),
+                    positionToUpdate.getElem().getIsbn(),
+                    positionToUpdate.getElem().getAuthor(),
+                    positionToUpdate.getElem().getTheme(),
+                    positionToUpdate.getElem().numCopies(),
+                    positionToUpdate.getElem().getAvailableCopies() + 1,
+                    positionToUpdate.getElem().getIdWorker(),
+                    positionToUpdate.getElem().getLoans()
+            );
+
+            /********************************************************************************/
+            /**** Actualizo la lista de préstamos totales que tiene un catalogedBook     ****/
+            /**** Entiendo que cuando libro es devuelto, hay que actualizar ese registro ****/
+            /********************************************************************************/
+            Traversal<Loan> loansIterator = newBook.getLoans().positions();
+            Position<Loan> loanPositionToUpdate = null;
+
+            // Luego buscamos qué posición ocupa el préstamo que tenga el loanId que recibimos
+            while(iterator.hasNext()) {
+                Position<Loan> currentPosition = loansIterator.next();
+                Loan currentLoan = currentPosition.getElem();
+
+                if(currentLoan.getLoanId().equals(loan.getLoanId())) {
+                    loanPositionToUpdate = currentPosition;
+                    break;
+                }
+            }
+
+            if(loanPositionToUpdate != null) {
+
+                Loan newLoan = new Loan(
+                    loanPositionToUpdate.getElem().getLoanId(),
+                    loanPositionToUpdate.getElem().getReaderId(),
+                    loanPositionToUpdate.getElem().getBookId(),
+                    loanPositionToUpdate.getElem().getWorkerId(),
+                    loanPositionToUpdate.getElem().getDate(),
+                    loan.getExpirationDate(),
+                    loan.getState(),
+                    loanPositionToUpdate.getElem().getTitle()
+                );
+
+                Loan oldLoan = newBook.getLoans().update(loanPositionToUpdate, newLoan);
+            }
+
+            CatalogedBook oldBook = catalogedBooks.update(positionToUpdate, newBook);
+
+            // Actualizamos la lista ordenada de los libros
+            updateMostReadBook(newBook);
         }
     }
 
@@ -1264,6 +1380,7 @@ public class LibraryPR2Impl implements Library {
         return "";
     }
 
+
     /***
      * Función que actualiza la lista ordenada de los lectores
      * @param reader Es el lector que ha cambiado
@@ -1271,6 +1388,16 @@ public class LibraryPR2Impl implements Library {
     private void updateReaderTheMost(Reader reader) {
         readerTheMost.delete(reader);
         readerTheMost.update(reader);
+    }
+
+    /***
+     * Función que actualiza la lista ordenada de los libros. Se debe actualizar tanto cuando un libro es tomando
+     * en préstamos como cuando ha sido devuelto, aunque no cambie su cantidad, pero cambian otros datos
+     * @param catalogedBook Es el libro que ha cambiado
+     */
+    private void updateMostReadBook(CatalogedBook catalogedBook) {
+        mostReadBook.delete(catalogedBook);
+        mostReadBook.update(catalogedBook);
     }
 
 
