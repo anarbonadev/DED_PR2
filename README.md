@@ -29,4 +29,11 @@
 - massStorageTest -> esta prueba valida que el sistema permite encolar libros de manera masiva.
 - deleteOfStackIfEmpty --> esta prueba valida que cuando se extrae el último libro de una pila, la pila se saca de la cola.
 
+### LibraryPR2Test
+- massStorageTest -> esta prueba valida que el sistema permite encolar libros de manera masiva. Es la misma que he añadido en BookWareHouseTest, pero probando los métodos de LibraryPR2Impl.
+- noBooksRemainingTest -> esta prueba valida que cuando se hayan catalogado todos los libros que hay en la cola, si se trata de catalogar uno más, salte la excepción NoBookException.
+- bookLoanAvailabilityTest -> esta prueba valida que cuando se hayan catalogado todos los libros que hay en la cola, si se trata de catalogar.
+- completeBookLoanCycleTest -> esta prueba valida que el flujo completo de préstamo y devolución de los libros
+
+
 

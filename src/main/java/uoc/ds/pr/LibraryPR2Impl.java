@@ -212,7 +212,7 @@ public class LibraryPR2Impl implements Library {
      * @throws ReaderNotFoundException Excepción que salta si no existe el lector
      * @throws BookNotFoundException Excepción que salta si no existe el libro
      * @throws WorkerNotFoundException Excepción que salta si no exíste el trabajador indicado
-     * @throws NoBookException Excepción que salta si no hay ningún libro pendiente de catalogar
+     * @throws NoBookException Excepción que salta si no existen ejemplares suficientes del libro
      * @throws MaximumNumberOfBooksException Excepción que salta si el lector tiene ya 3 libros en préstamo
      */
     @Override
@@ -229,6 +229,9 @@ public class LibraryPR2Impl implements Library {
 
         // Si el lector ya tiene tres libros en préstamo se indicará un error
         if(getConcurrentLoansByReader(readerId) == 3) throw new MaximumNumberOfBooksException(bundle.getString("exception.MaximumNumberOfBooksException"));
+
+        // Si no existen ejemplares suficientes del libro se indicará un error
+        if(getAvailableCopies(bookId) == 0) throw new NoBookException(bundle.getString("exception.NoBookException.NotAvailableCopies"));
 
         // Recuperamos el título del libro que se está prestando
         String title = getTitleBookById(bookId);
@@ -269,6 +272,8 @@ public class LibraryPR2Impl implements Library {
 
         // Si no existe el préstamo se indicará un error
         if(loan == null) throw new LoanNotFoundException(bundle.getString("exception.LoanNotFoundException"));
+        // Si el préstamo existe pero no está en un estado válido para ser devuelto
+        else if(loan.getState() != LoanState.INPROGRESS) throw new LoanNotFoundException(bundle.getString("exception.LoanNotFoundException.IncorrectStat"));
 
         // Si la fecha de devolución es anterior a la fecha final de devolución se marcará el préstamo como “Completado”
         // Si la fecha de devolución es posterior a la fecha final de devolución se marcará el préstamo como “Retrasado”
@@ -1342,8 +1347,9 @@ public class LibraryPR2Impl implements Library {
 
         // Busco la posición dónde está el préstamo
         for(int i = 0; i < concurrentLoans.length - 1; i++) {
-            if(concurrentLoans[i].getLoanId().equals(loan.getLoanId())) {
+            if(concurrentLoans[i] != null && concurrentLoans[i].getLoanId().equals(loan.getLoanId())) {
                 index = i;
+                break;
             }
         }
 
@@ -1395,6 +1401,30 @@ public class LibraryPR2Impl implements Library {
     private void updateMostReadBook(CatalogedBook catalogedBook) {
         mostReadBook.delete(catalogedBook);
         mostReadBook.update(catalogedBook);
+    }
+
+
+    /***
+     * Función que se usa para comprobar cuántos ejemplares hay disponibles, de un libro concreto, para poder
+     * ser prestados
+     * @param bookId Identificador del libro que queremos consultar
+     * @return Devuelve la cantidad de copias disponibles
+     */
+    private int getAvailableCopies(String bookId) {
+
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
+
+        // Luego recorremos la lista de libros buscando por bookId
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+
+            if(catalogedBook.getBookId().equals(bookId)) {
+                return catalogedBook.getAvailableCopies();
+            }
+        }
+        return 0;
+
     }
 
 
