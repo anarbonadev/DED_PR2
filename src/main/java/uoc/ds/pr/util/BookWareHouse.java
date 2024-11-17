@@ -2,11 +2,20 @@ package uoc.ds.pr.util;
 
 import edu.uoc.ds.adt.sequential.StackArrayImpl;
 import edu.uoc.ds.traversal.Iterator;
+import uoc.ds.pr.exceptions.DSException;
+import uoc.ds.pr.exceptions.NoBookException;
 import uoc.ds.pr.model.*;
+
+import java.util.ResourceBundle;
 
 import static uoc.ds.pr.Library.*;
 
 public class BookWareHouse {
+
+    /***
+     * Los mensajes de error indicados los recuperamos del fichero error_messages.properties
+     */
+    private static final ResourceBundle bundle = ResourceBundle.getBundle("error_messages");
 
     /***
      * Aquí declaro todas las estructuras de datos que vamos a usar. Se indican en la PEC1, página 15
@@ -106,6 +115,9 @@ public class BookWareHouse {
      */
     public Book getBookPendingCataloging() {
 
+        // Si la cola está vacía, salta una excepción
+        if(queueLinkedList.isEmpty()) return null;
+
         // Extraemos el libro que está en la cima de la primera STACK
         StoredBook storedBook = queueLinkedList.peek().pop();
 
@@ -134,12 +146,11 @@ public class BookWareHouse {
         // Inicializa tanto numStack como numPosition a -1 para controlar cuando un libro no se encuentra en
         // ninguna pila
         Position position = new Position();
-        boolean found = false;
 
         // Creamos un iterador para recorrer la cola
         Iterator<StackArrayImpl<StoredBook>> iterator = queueLinkedList.values();
 
-        while (iterator.hasNext() && !found) {
+        while (iterator.hasNext()) {
 
             // Sacamos la cola que ocupa esta posición del iterador
             StackArrayImpl<StoredBook> stackArray = iterator.next();
@@ -147,13 +158,12 @@ public class BookWareHouse {
             // Creamos un nuevo iterador, pero esta vez de la cola
             Iterator<StoredBook> storedBookIterator = stackArray.values();
 
-            while (storedBookIterator.hasNext() && !found) {
+            while (storedBookIterator.hasNext()) {
 
                 // Sacamos el libro que ocupa esta posición del iterador
                 StoredBook storedBook = storedBookIterator.next();
 
                 if(bookId.equals(storedBook.getBookId())) {
-                    found = true;
                     return position;
                 }
 
@@ -168,10 +178,8 @@ public class BookWareHouse {
             position.setNumPosition(0);
         }
 
-        if(!found) {
-            position.setNumStack(-1);
-            position.setNumPosition(-1);
-        }
+        position.setNumStack(-1);
+        position.setNumPosition(-1);
 
         return position;
     }

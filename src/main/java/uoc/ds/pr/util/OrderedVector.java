@@ -23,8 +23,8 @@ public class OrderedVector<E> implements FiniteContainer<E> {
     }
 
     /***
-     *
-     * @param vIn
+     * Función que busca el elemento que recibe como parámetro y si existe, elimina el elemento viejo e inserta el nuevo
+     * @param vIn Es el objeto que hay que sustituir
      */
     public void update(E vIn) {
         int i = 0;
@@ -56,6 +56,11 @@ public class OrderedVector<E> implements FiniteContainer<E> {
 
     }
 
+    /***
+     * Función que devuelve el objeto que está en la posición indicada
+     * @param i La posición que buscamos
+     * @return Devuelve uno de los elementos de la colección
+     */
     public E elementAt(int i) {
         return this.data[i];
     }
