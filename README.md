@@ -1,3 +1,4 @@
+
 ## PR2
 
 ## Author
@@ -5,6 +6,15 @@
 - e-mail: anarbonas@uoc.edu
 
 ## Alcance de la entrega
+- El alcance de esta entrega ha sido la implementación de los distintos métodos de la clase LibraryPR2Impl, de forma que los tests definidos en la clase **LibraryPR2Test** fueran validados.
+- Para conseguir este objetivo he tenido que crear todas la clases del modelo de datos, *package uoc.ds.pr.model*.
+- También he tenido que desarrollar la clase **BookWareHouse**, por 2 motivos:
+  - Se nos proporcionó una clase **BookWareHouseTest**, por tanto, había que añadir una clase que satisfaciera dichos tests (TDD)
+  - En la clase **LibraryPR2Impl** había una referencia apuntando a esta otra clase.
+- La clase BookWareHouse la he entendido como que es el almacén de los libros. Aquí tenemos la cola, las pilas y todos los métodos para gestionar el almacén.
+- Ha habido que desarrollar otras 2 clases, en base a los test (TDD):
+- **QueueLinkedList**: esta clase representa la cola de pilas.
+- **OrderedVector**: esta clase la usamos para comparar objetos y conseguir un vector ordenado por el comparador que indiquemos.
 
 ## Modificaciones y/o actualizaciones realizadas sobre el diseño inicial propuesto
 
@@ -62,16 +72,16 @@
 #### timeToBeCatalogedTest
 - En esté método, al final, encontramos el siguiente código:
 
-  >     /**
-  >     	* position = bookWareHouse.getPosition("HP4a");
-  >     	* Assert.assertEquals(2, position.getNumStack());
-  >     	* Assert.assertEquals(9, position.getNum());
-  >     */
-  >     int t = theLibrary.timeToBeCataloged("HP4a", 8, 12);  
-  >       
-  >     Assert.assertEquals(244, t);
+  >     /**  
+  >         * position = bookWareHouse.getPosition("HP4a");  
+  >         * Assert.assertEquals(2, position.getNumStack());  
+  >         * Assert.assertEquals(9, position.getNum());  
+  >     */  
+  >     int t = theLibrary.timeToBeCataloged("HP4a", 8, 12);    
+  >         
+  >     Assert.assertEquals(244, t);  
 
 - Lo he comentado con el profesor, con Ángel, porque en este punto el libro **HP4a** está en la segunda pila de la cola, pero las pilas van numeradas de 0 a N, por lo que **position.getNumStack()** debe dar 1.
 - Si el libro está en la cola 1 posición 9, hay que procesar la pila anterior totalmente, junto con sus 10 libros, y luego hay que procesar la segunda cola, dónde está **HP4a**, que como entró el primero en la cola, está abajo del todo, y hay que procesar también 10 libros. El tiempo de 244 minutos no es correcto, debe dar **255** minutos.
 
-## Comentarios adicionales  
+## Comentarios adicionales
