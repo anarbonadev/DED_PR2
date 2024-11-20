@@ -33,7 +33,7 @@
 
 ## Indicaciones sobre los nuevos juegos de pruebas
 
-### BookWareHouseTest
+### BookWareHouseANSTest
 - **catalogingEmptyWareHouseTest** -> esta prueba valida que no se permita catalogar un libro si la cola está vacía. Si la cola está vacía, el método getBookPendingCataloging() devuelve NULL.
 
 - **duplicateBookStoreTest** -> esta prueba valida que se permitan añadir libros repetidos a la cola.
@@ -46,7 +46,7 @@
 
 - **deleteOfStackIfEmpty** --> esta prueba valida que cuando se extrae el último libro de una pila, la pila se saca de la cola.
 
-### LibraryPR2Test
+### LibraryPR2ANSTest
 - **massStorageTest** -> esta prueba valida que el sistema permite encolar libros de manera masiva. Es la misma que he añadido en BookWareHouseTest, pero probando los métodos de LibraryPR2Impl.
 
 - **noBooksRemainingTest** -> esta prueba valida que cuando se hayan catalogado todos los libros que hay en la cola, si se trata de catalogar uno más, salte la excepción NoBookException.
