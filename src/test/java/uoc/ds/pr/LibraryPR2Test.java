@@ -1,5 +1,6 @@
 package uoc.ds.pr;
 
+import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.traversal.Iterator;
 import org.junit.After;
 import org.junit.Assert;
@@ -296,7 +297,8 @@ public class LibraryPR2Test {
          */
         int t = theLibrary.timeToBeCataloged("HP4a",  8, 12);
 
-        Assert.assertEquals(244, t);
+        // Modifico el tiempo de preparación a 256 como hemos comentado en el foro
+        Assert.assertEquals(256, t);
 
     }
 
@@ -513,14 +515,5 @@ public class LibraryPR2Test {
                 theLibrary.giveBackBook("LOAN1",  DateUtils.createLocalDate("10-11-2024")));
 
     }
-
-
-
-
-
-
-
-
-
 
 }

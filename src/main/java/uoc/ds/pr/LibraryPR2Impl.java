@@ -176,12 +176,12 @@ public class LibraryPR2Impl implements Library {
         }
 
         // Extraemos el primero libro de la primera cola
-        Book bookToCatalog = this.bookWareHouse.getBookPendingCataloging();
+        Book bookToCatalog = bookWareHouse.getBookPendingCataloging();
 
         // Comprobamos si el libro exíste o no en la Linked List de libros catalogados
         // Si existe el libro, actualizamos sus valores totalCopies + 1 y availableCopies + 1
         // Si no existe, lo agregamos al final
-        CatalogedBookResult catalogedBookResult = this.findAndUpdateBookByIsbn(bookToCatalog, workerId);
+        CatalogedBookResult catalogedBookResult = findAndUpdateBookByIsbn(bookToCatalog, workerId);
 
         // Si el libro ya existía en la colección de libros catalogados, sea el trabajador actual que catalogó
         // el libro la primera vez o no, no se incrementa la cantidad de libros catalogados por el trabajador
@@ -323,28 +323,13 @@ public class LibraryPR2Impl implements Library {
         // Si el libro no existe se indicará un error
         if(position.getNumStack() == -1) throw new BookNotFoundException(bundle.getString("exception.BookNotFoundException"));
 
-
-        // Calculamos el tiempo que se tarda en catalogar el libro
-
-        // Tiempo para catalogar los 10 libros de los montones previos. Al número de la pila en el que se encuentra el
-        // libro, le sumo 1 porque las posiciones de las pilas dentro de la cola empieza en 0
-        // El libro HP4a estaría en la segunda pila dentro de la cola. Aunque según BooksData estaría en la tercera pila,
-        // al ejecutar la función catalogBookTest() se han catalogado los 10 libros de la primera pila
-
         // Tiempo para catalogar las pilas anteriores a la pila en la que se encuentra el libro
-        //int t1 = (position.getNumStack() - 1) * (lotPreparationTime + (Library.MAX_BOOK_STACK * bookCatalogTime));
-
-        //TODO: quito el -1 porque sino cuando el libro que estamos calculando esté en la segunda pila, la primera pila
-        // da tiempo 0, porque sería 1 - 1 = 0
         int t1 = (position.getNumStack()) * (lotPreparationTime + (Library.MAX_BOOK_STACK * bookCatalogTime));
 
         // Tiempo para catalogar el libro que buscamos dentro de su pila. Al número de posición dentro de la pila
         // le sumo 1 porque, como antes, las posiciones empiezan en 0, si el libro está en la posición 9, tengo que catalogar
         // los 9 libros anteriores más este libro, total 10
-        //int t2 = lotPreparationTime + ((position.getNum() + 1) * bookCatalogTime);
-
-        // TODO: uso esta versión alternativa para que pase el test,pero creo que es una errata que sean 244 minutos
-        int t2 = lotPreparationTime + (position.getNum() * bookCatalogTime);
+        int t2 = lotPreparationTime + ((position.getNum() + 1) * bookCatalogTime);
 
         int totalTime = t1 + t2;
 
@@ -778,6 +763,7 @@ public class LibraryPR2Impl implements Library {
 
         return numberClosedLoans;
     }
+
 
     /***********************************************************************************/
     /******************** PRIVATE OPERATIONS *******************************************/
