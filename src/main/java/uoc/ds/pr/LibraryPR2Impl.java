@@ -176,12 +176,12 @@ public class LibraryPR2Impl implements Library {
         }
 
         // Extraemos el primero libro de la primera cola
-        Book bookToCatalog = this.bookWareHouse.getBookPendingCataloging();
+        Book bookToCatalog = bookWareHouse.getBookPendingCataloging();
 
         // Comprobamos si el libro exíste o no en la Linked List de libros catalogados
         // Si existe el libro, actualizamos sus valores totalCopies + 1 y availableCopies + 1
         // Si no existe, lo agregamos al final
-        CatalogedBookResult catalogedBookResult = this.findAndUpdateBookByIsbn(bookToCatalog, workerId);
+        CatalogedBookResult catalogedBookResult = findAndUpdateBookByIsbn(bookToCatalog, workerId);
 
         // Si el libro ya existía en la colección de libros catalogados, sea el trabajador actual que catalogó
         // el libro la primera vez o no, no se incrementa la cantidad de libros catalogados por el trabajador
@@ -212,7 +212,7 @@ public class LibraryPR2Impl implements Library {
      * @throws ReaderNotFoundException Excepción que salta si no existe el lector
      * @throws BookNotFoundException Excepción que salta si no existe el libro
      * @throws WorkerNotFoundException Excepción que salta si no exíste el trabajador indicado
-     * @throws NoBookException Excepción que salta si no hay ningún libro pendiente de catalogar
+     * @throws NoBookException Excepción que salta si no existen ejemplares suficientes del libro
      * @throws MaximumNumberOfBooksException Excepción que salta si el lector tiene ya 3 libros en préstamo
      */
     @Override
@@ -229,6 +229,9 @@ public class LibraryPR2Impl implements Library {
 
         // Si el lector ya tiene tres libros en préstamo se indicará un error
         if(getConcurrentLoansByReader(readerId) == 3) throw new MaximumNumberOfBooksException(bundle.getString("exception.MaximumNumberOfBooksException"));
+
+        // Si no existen ejemplares suficientes del libro se indicará un error
+        if(getAvailableCopies(bookId) == 0) throw new NoBookException(bundle.getString("exception.NoBookException.NotAvailableCopies"));
 
         // Recuperamos el título del libro que se está prestando
         String title = getTitleBookById(bookId);
@@ -269,6 +272,8 @@ public class LibraryPR2Impl implements Library {
 
         // Si no existe el préstamo se indicará un error
         if(loan == null) throw new LoanNotFoundException(bundle.getString("exception.LoanNotFoundException"));
+        // Si el préstamo existe pero no está en un estado válido para ser devuelto
+        else if(loan.getState() != LoanState.INPROGRESS) throw new LoanNotFoundException(bundle.getString("exception.LoanNotFoundException.IncorrectStat"));
 
         // Si la fecha de devolución es anterior a la fecha final de devolución se marcará el préstamo como “Completado”
         // Si la fecha de devolución es posterior a la fecha final de devolución se marcará el préstamo como “Retrasado”
@@ -318,28 +323,13 @@ public class LibraryPR2Impl implements Library {
         // Si el libro no existe se indicará un error
         if(position.getNumStack() == -1) throw new BookNotFoundException(bundle.getString("exception.BookNotFoundException"));
 
-
-        // Calculamos el tiempo que se tarda en catalogar el libro
-
-        // Tiempo para catalogar los 10 libros de los montones previos. Al número de la pila en el que se encuentra el
-        // libro, le sumo 1 porque las posiciones de las pilas dentro de la cola empieza en 0
-        // El libro HP4a estaría en la segunda pila dentro de la cola. Aunque según BooksData estaría en la tercera pila,
-        // al ejecutar la función catalogBookTest() se han catalogado los 10 libros de la primera pila
-
         // Tiempo para catalogar las pilas anteriores a la pila en la que se encuentra el libro
-        //int t1 = (position.getNumStack() - 1) * (lotPreparationTime + (Library.MAX_BOOK_STACK * bookCatalogTime));
-
-        //TODO: quito el -1 porque sino cuando el libro que estamos calculando esté en la segunda pila, la primera pila
-        // da tiempo 0, porque sería 1 - 1 = 0
         int t1 = (position.getNumStack()) * (lotPreparationTime + (Library.MAX_BOOK_STACK * bookCatalogTime));
 
         // Tiempo para catalogar el libro que buscamos dentro de su pila. Al número de posición dentro de la pila
         // le sumo 1 porque, como antes, las posiciones empiezan en 0, si el libro está en la posición 9, tengo que catalogar
         // los 9 libros anteriores más este libro, total 10
-        //int t2 = lotPreparationTime + ((position.getNum() + 1) * bookCatalogTime);
-
-        // TODO: uso esta versión alternativa para que pase el test,pero creo que es una errata que sean 244 minutos
-        int t2 = lotPreparationTime + (position.getNum() * bookCatalogTime);
+        int t2 = lotPreparationTime + ((position.getNum() + 1) * bookCatalogTime);
 
         int totalTime = t1 + t2;
 
@@ -773,6 +763,7 @@ public class LibraryPR2Impl implements Library {
 
         return numberClosedLoans;
     }
+
 
     /***********************************************************************************/
     /******************** PRIVATE OPERATIONS *******************************************/
@@ -1342,8 +1333,9 @@ public class LibraryPR2Impl implements Library {
 
         // Busco la posición dónde está el préstamo
         for(int i = 0; i < concurrentLoans.length - 1; i++) {
-            if(concurrentLoans[i].getLoanId().equals(loan.getLoanId())) {
+            if(concurrentLoans[i] != null && concurrentLoans[i].getLoanId().equals(loan.getLoanId())) {
                 index = i;
+                break;
             }
         }
 
@@ -1395,6 +1387,30 @@ public class LibraryPR2Impl implements Library {
     private void updateMostReadBook(CatalogedBook catalogedBook) {
         mostReadBook.delete(catalogedBook);
         mostReadBook.update(catalogedBook);
+    }
+
+
+    /***
+     * Función que se usa para comprobar cuántos ejemplares hay disponibles, de un libro concreto, para poder
+     * ser prestados
+     * @param bookId Identificador del libro que queremos consultar
+     * @return Devuelve la cantidad de copias disponibles
+     */
+    private int getAvailableCopies(String bookId) {
+
+        // Primero recuperamos el iterador de catalogedBooks
+        Iterator<CatalogedBook> iterator = catalogedBooks.values();
+
+        // Luego recorremos la lista de libros buscando por bookId
+        while(iterator.hasNext()) {
+            CatalogedBook catalogedBook = iterator.next();
+
+            if(catalogedBook.getBookId().equals(bookId)) {
+                return catalogedBook.getAvailableCopies();
+            }
+        }
+        return 0;
+
     }
 
 

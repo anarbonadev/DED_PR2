@@ -1,5 +1,6 @@
 package uoc.ds.pr;
 
+import edu.uoc.ds.adt.sequential.LinkedList;
 import edu.uoc.ds.traversal.Iterator;
 import uoc.ds.pr.exceptions.*;
 import uoc.ds.pr.model.*;
@@ -75,7 +76,6 @@ public interface Library {
     public int numCurrentLoansByReader(String readerId);
     public int numClosedLoansByWorker(String workerId);
     public int numClosedLoansByReader(String readerId);
-
 }
 
 
